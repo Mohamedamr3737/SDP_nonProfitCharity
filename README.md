@@ -42,3 +42,7 @@ This project aims to develop a robust and scalable software system for a non-pro
 - **Design Patterns**: Strategy, Observer, Decorator, Factory, Singleton, and MVC.
 - **Frontend**: HTML, CSS, JavaScript, Bootstrap.
 - **Database**: MySQL.
+
+## To run this project
+cd public
+php -S localhost:8000
