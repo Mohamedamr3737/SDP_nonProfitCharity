@@ -44,5 +44,5 @@ This project aims to develop a robust and scalable software system for a non-pro
 - **Database**: MySQL.
 
 ## To run this project
-cd public
-php -S localhost:8000
+- cd public
+- php -S localhost:8000
