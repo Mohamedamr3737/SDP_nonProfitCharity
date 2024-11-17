@@ -2,13 +2,12 @@
 
 // File: models/Receipt/TaxDecorator.php
 require_once 'Receipt.php';
-
-class TaxDecorator implements Receipt {
-    private $receipt;
+require_once 'Decorator.php';
+class TaxDecorator extends Decorator {
     private $taxRate;
 
     public function __construct(Receipt $receipt, $taxRate=null) {
-        $this->receipt = $receipt;
+        $this->receipt= $receipt;
         $this->taxRate = $taxRate;
     }
 
