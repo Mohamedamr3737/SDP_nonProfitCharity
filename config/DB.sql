@@ -46,6 +46,7 @@ CREATE TABLE tasks (
     last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     is_deleted TINYINT(1) DEFAULT 0,
     assigned_to INT NULL,
+    hours INT NULL,
     FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE SET NULL,
     FOREIGN KEY (assigned_to) REFERENCES users(id) ON DELETE SET NULL
 

@@ -25,19 +25,20 @@ class TaskModel extends BaseModel {
     }
 
     public function createTask($data) {
-        $stmt = $this->db->prepare("INSERT INTO tasks (event_id, name, required_skill, is_completed) VALUES (:event_id, :name, :required_skill, :is_completed)");
+        $stmt = $this->db->prepare("INSERT INTO tasks (event_id, name, required_skill, is_completed, hours) VALUES (:event_id, :name, :required_skill, :is_completed, :hours)");
         $stmt->execute([
             'event_id' => $data['event_id'],
             'name' => $data['name'],
             'required_skill' => $data['required_skill'],
             'is_completed' => $data['is_completed'] ?? 0,
+            'hours' => $data['hours'],
         ]);
         return $this->db->lastInsertId();
     }
 
     public function updateTask($id, $data) {
         // Update the task
-        $query = "UPDATE tasks SET name = :name, required_skill = :required_skill, is_completed = :is_completed";
+        $query = "UPDATE tasks SET name = :name, required_skill = :required_skill, is_completed = :is_completed, hours = :hours";
         if (isset($data['assigned_to'])) {
             $query .= ", assigned_to = :assigned_to";
         }
@@ -48,6 +49,7 @@ class TaskModel extends BaseModel {
             'name' => $data['name'],
             'required_skill' => $data['required_skill'],
             'is_completed' => $data['is_completed'] ?? 0,
+            'hours' => $data['hours'],
             'id' => $id,
         ];
         if (isset($data['assigned_to'])) {

@@ -15,6 +15,9 @@
         <label for="required_skill">Required Skill:</label>
         <input type="text" id="required_skill" name="required_skill" value="<?= htmlspecialchars($task['required_skill']); ?>" required>
         <br>
+        <label for="hours">Hours:</label>
+        <input type="text" id="hours" name="hours" value="<?= htmlspecialchars($task['hours']); ?>" required>
+        <br>
         <label for="is_completed">Is Completed:</label>
         <input type="checkbox" id="is_completed" name="is_completed" <?= $task['is_completed'] ? 'checked' : ''; ?>>
         <br>

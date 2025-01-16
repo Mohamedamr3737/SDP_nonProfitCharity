@@ -23,6 +23,7 @@ unset($_SESSION['certificate_link']); // Clear the session after displaying the 
             <th>Required Skill</th>
             <th>Is Completed</th>
             <th>Event Name</th>
+            <th>Hours</th>
             <th>Actions</th>
         </tr>
         <?php foreach ($tasks as $task): ?>
@@ -31,6 +32,7 @@ unset($_SESSION['certificate_link']); // Clear the session after displaying the 
             <td><?= htmlspecialchars($task['required_skill']); ?></td>
             <td><?= $task['is_completed'] ? 'Yes' : 'No'; ?></td>
             <td><?= htmlspecialchars($task['event_name']); ?></td>
+            <td><?= htmlspecialchars($task['hours']); ?></td>
             <td>
                 <a href="/tasks/edit?id=<?= $task['id']; ?>">Edit</a>
                 <form action="/tasks/delete" method="post" style="display:inline;">

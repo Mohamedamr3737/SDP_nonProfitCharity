@@ -22,6 +22,9 @@
         <label for="required_skill">Required Skill:</label>
         <input type="text" id="required_skill" name="required_skill" required>
         <br>
+        <label for="hours">Hours:</label>
+        <input type="number" id="hours" name="hours" required>
+        <br>
         <label for="is_completed">Is Completed:</label>
         <input type="checkbox" id="is_completed" name="is_completed">
         <br>
