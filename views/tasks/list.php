@@ -1,5 +1,12 @@
 <?php
 $tasks = $taskController->getAllTasks(); // Retrieve all tasks with event details
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+$certificateLink = $_SESSION['certificate_link'] ?? null; // Retrieve certificate link from session if available
+unset($_SESSION['certificate_link']); // Clear the session after displaying the link
 ?>
 
 <!DOCTYPE html>
@@ -30,6 +37,11 @@ $tasks = $taskController->getAllTasks(); // Retrieve all tasks with event detail
                     <input type="hidden" name="id" value="<?= $task['id']; ?>">
                     <button type="submit">Delete</button>
                 </form>
+                <?php if ($task['is_completed']): ?>
+                    <a href="/tasks/generate_certificate?task_id=<?= $task['id']; ?>&user_id=<?= $task['assigned_to']; ?>">Generate Certificate</a>
+                <?php else: ?>
+                    Not Completed
+                <?php endif; ?>
             </td>
         </tr>
         <?php endforeach; ?>
@@ -40,5 +52,10 @@ $tasks = $taskController->getAllTasks(); // Retrieve all tasks with event detail
     </form>
 
     <a href="/events/list">Back to Events</a>
+
+    <?php if ($certificateLink): ?>
+        <h2>Download Certificate</h2>
+        <a href="<?= $certificateLink; ?>" target="_blank">Download Certificate</a>
+    <?php endif; ?>
 </body>
 </html>

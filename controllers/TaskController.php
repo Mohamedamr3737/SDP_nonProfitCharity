@@ -4,6 +4,7 @@ require_once __DIR__ . '/../models/commands/Tasks/AddTaskCommand.php';
 require_once __DIR__ . '/../models/commands/Tasks/EditTaskCommand.php';
 require_once __DIR__ . '/../models/commands/Tasks/DeleteTaskCommand.php';
 require_once __DIR__ . '/../models/FacadeTaskAssignment/TaskAssignmentFacade.php';
+require_once __DIR__ . '/../models/Template/EnhancedVolunteerCertificate.php';
 class TaskController {
     private $model;
     private $userId;
@@ -64,6 +65,25 @@ class TaskController {
     public function assignTask($taskId) {
         $facade = new TaskAssignmentFacade(new User(Database::getInstance()->getConnection()), $this->model);
         return $facade->assignTaskToUser($taskId);
+    }
+
+    public function generateCertificate($taskId, $userId) {
+        // Fetch the task and volunteer details
+        $task = $this->model->getTask($taskId);
+        $userModel= new User(Database::getInstance()->getConnection());
+        $volunteer = $userModel->findById($userId);
+    
+        if (!$task || !$volunteer) {
+            return null; // Return null for invalid task or volunteer
+        }
+    
+        try {
+            // Use the Template Pattern to generate the certificate
+            $certificateGenerator = new EnhancedVolunteerCertificate();
+            return $certificateGenerator->generateCertificate($volunteer, $task); // Return file path
+        } catch (Exception $e) {
+            return null; // Return null on failure
+        }
     }
     
 }

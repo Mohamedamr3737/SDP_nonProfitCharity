@@ -21,7 +21,7 @@ $donationController = new DonationController();
 if (isset($_SESSION['user_id'])) {
 $eventController = new EventController($model, $_SESSION['user_id']);
 $taskModel = new TaskModel(Database::getInstance()->getConnection());
-$taskController = new TaskController($taskModel, $_SESSION['user_id']);
+$taskController = new TaskController($taskModel, $_SESSION['user_id'], $userModel);
 }
 // $taskController = new TaskController();
 
@@ -45,6 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         // $donationController->showDonationForm();
         include '../views/donation/create.php';
     } elseif ($uri === 'events/list') {
+
         // Show list of events
         include '../views/events/list.php';
     } elseif ($uri === 'events/add') {
@@ -68,6 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $eventController->undo();
         header('Location: /events/list');
     }    elseif ($uri === 'tasks/list') {
+
         include '../views/tasks/list.php';
     } elseif ($uri === 'tasks/add') {
         include '../views/tasks/add.php';
@@ -79,6 +81,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     }elseif ($uri === 'tasks/available') {
         $availableTasks = $taskController->getAvailableTasks();
         include '../views/tasks/available.php';
+    }elseif ($uri === 'tasks/generate_certificate') {
+        $taskId = $_GET['task_id'];
+        $userId = $_GET['user_id'];
+    
+        $filePath = $taskController->generateCertificate($taskId, $userId);
+    
+        if ($filePath) {
+            $_SESSION['certificate_link'] = $filePath; // Store the link in the session
+            header('Location: /tasks/list'); // Redirect back to the tasks list
+            exit;
+        } else {
+            echo "Failed to generate certificate.";
+        }
     }
      else {
         echo "Page not found.";
