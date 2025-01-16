@@ -29,6 +29,9 @@ class TaskController {
     }
 
     public function editTask($id, $data) {
+        $data['is_completed'] = isset($data['is_completed']) && $data['is_completed'] === 'on' ? 1 : 0;
+        error_log("editTask called with ID: {$id}");
+        error_log("Received Data: " . print_r($data, true));
         $command = new EditTaskCommand($this->model, $this->userId, $id, $data);
         $command->execute();
     }
