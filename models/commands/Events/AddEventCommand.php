@@ -22,11 +22,16 @@ class AddEventCommand implements Command {
     }
 
     public function undo() {
-        if ($this->lastInsertedId) {
-            $this->model->deleteEvent($this->lastInsertedId);
-            $this->model->saveAction($this->userId, 'delete', $this->lastInsertedId, $this->eventData);
+        $action = $this->model->getLastAction($this->userId);
+        if ($action) {
+            $eventData = json_decode($action['event_data'], true);
+        
+        if ($eventData) {
+            $this->model->deleteEvent($this->eventData['id']);
         }
     }
+    }
+
 }
 ?>
 

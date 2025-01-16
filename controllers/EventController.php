@@ -3,7 +3,6 @@ require_once __DIR__.'/../models/Events.php';
 require_once __DIR__. '/../models/commands/Events/AddEventCommand.php';
 require_once __DIR__. '/../models/commands/Events/EditEventCommand.php';
 require_once __DIR__. '/../models/commands/Events/DeleteEventCommand.php';
-require_once __DIR__. '/../models/commands/SessionInvoker.php';
 
 class EventController {
     private $model;
@@ -41,38 +40,21 @@ class EventController {
         $command->execute();
     }
 
-    // Undo the last action
+    // Undo the last action    
     public function undo() {
         $action = $this->model->getLastAction($this->userId);
         if ($action) {
             $eventData = json_decode($action['event_data'], true);
 
             if ($action['action_type'] === 'add') {
-                $this->model->deleteEvent($action['event_id']);
+                $command = new AddEventCommand($this->model, $this->userId, $eventData);
             } elseif ($action['action_type'] === 'edit') {
-                $this->model->updateEvent($action['event_id'], $eventData);
+                $command = new EditEventCommand($this->model, $this->userId, $action['event_id'], $eventData);
             } elseif ($action['action_type'] === 'delete') {
-                $this->model->restoreEvent($eventData);
+                $command = new DeleteEventCommand($this->model, $this->userId, $action['event_id']);
             }
 
-            $this->model->removeAction($action['id']);
-        }
-    }
-
-    // Redo the last undone action
-    public function redo() {
-        $action = $this->model->getLastRedoAction($this->userId);
-        if ($action) {
-            $eventData = json_decode($action['event_data'], true);
-
-            if ($action['action_type'] === 'add') {
-                $this->model->restoreEvent($eventData);
-            } elseif ($action['action_type'] === 'edit') {
-                $this->model->updateEvent($action['event_id'], $eventData);
-            } elseif ($action['action_type'] === 'delete') {
-                $this->model->deleteEvent($action['event_id']);
-            }
-
+            $command->undo();
             $this->model->removeAction($action['id']);
         }
     }

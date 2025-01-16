@@ -23,10 +23,13 @@ class EditEventCommand implements Command {
     }
 
     public function undo() {
-        if ($this->oldData) {
-            $this->model->updateEvent($this->eventId, $this->oldData);
-            $this->model->saveAction($this->userId, 'edit', $this->eventId, $this->newData);
+        $action = $this->model->getLastAction($this->userId);
+        if ($action) {
+            $eventData = json_decode($action['event_data'], true);
+        if ($eventData) {
+            $this->model->updateEvent($eventData['id'], $eventData);
         }
+    }
     }
 }
 ?>

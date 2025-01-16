@@ -16,15 +16,21 @@ class DeleteEventCommand implements Command {
 
     public function execute() {
         $this->oldData = $this->model->getEvent($this->eventId);
+        error_log("aaaaaaa".$this-> oldData);
+
         $this->model->deleteEvent($this->eventId);
         $this->model->saveAction($this->userId, 'delete', $this->eventId, $this->oldData);
     }
 
     public function undo() {
-        if ($this->oldData) {
-            $this->model->restoreEvent($this->oldData);
-            $this->model->saveAction($this->userId, 'add', $this->eventId, $this->oldData);
+        $action = $this->model->getLastAction($this->userId);
+        if ($action) {
+            $eventData = json_decode($action['event_data'], true);
+        
+        if ($eventData) {
+            $this->model->restoreEvent($eventData);
         }
+    }
     }
 }
 ?>
