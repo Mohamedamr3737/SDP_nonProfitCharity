@@ -3,7 +3,7 @@ require_once __DIR__ . '/../models/Tasks.php';
 require_once __DIR__ . '/../models/commands/Tasks/AddTaskCommand.php';
 require_once __DIR__ . '/../models/commands/Tasks/EditTaskCommand.php';
 require_once __DIR__ . '/../models/commands/Tasks/DeleteTaskCommand.php';
-
+require_once __DIR__ . '/../models/FacadeTaskAssignment/TaskAssignmentFacade.php';
 class TaskController {
     private $model;
     private $userId;
@@ -29,6 +29,8 @@ class TaskController {
     }
 
     public function editTask($id, $data) {
+        $data['is_completed'] = isset($data['is_completed']) && $data['is_completed'] === 'on' ? 1 : 0;
+
         $command = new EditTaskCommand($this->model, $this->userId, $id, $data);
         $command->execute();
     }
@@ -55,5 +57,14 @@ class TaskController {
             $this->model->removeAction($action['id']);
         }
     }
+    public function getAvailableTasks() {
+        return $this->model->getAllTasks(); // You can filter tasks by availability here if needed.
+    }
+    
+    public function assignTask($taskId) {
+        $facade = new TaskAssignmentFacade(new User(Database::getInstance()->getConnection()), $this->model);
+        return $facade->assignTaskToUser($taskId);
+    }
+    
 }
 ?>

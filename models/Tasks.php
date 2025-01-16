@@ -36,16 +36,53 @@ class TaskModel extends BaseModel {
     }
 
     public function updateTask($id, $data) {
-        error_log("Executing SQL: UPDATE tasks SET name = '{$data['name']}', required_skill = '{$data['required_skill']}', is_completed = {$data['is_completed']} WHERE id = {$id}");
-        $stmt = $this->db->prepare("UPDATE tasks SET name = :name, required_skill = :required_skill, is_completed = :is_completed WHERE id = :id");
-        $stmt->execute([
+        // Update the task
+        $query = "UPDATE tasks SET name = :name, required_skill = :required_skill, is_completed = :is_completed";
+        if (isset($data['assigned_to'])) {
+            $query .= ", assigned_to = :assigned_to";
+        }
+        $query .= " WHERE id = :id";
+    
+        $stmt = $this->db->prepare($query);
+        $params = [
             'name' => $data['name'],
             'required_skill' => $data['required_skill'],
             'is_completed' => $data['is_completed'] ?? 0,
             'id' => $id,
+        ];
+        if (isset($data['assigned_to'])) {
+            $params['assigned_to'] = $data['assigned_to'];
+        }
+    
+        $stmt->execute($params);
+        error_log(json_encode($data));
+        $thisTask = $this->getTask($data['id']);
+        error_log(message: "aaaaaa ".json_encode($thisTask));
+        // Update the user's availability
+        if (isset($thisTask['assigned_to'])) {
+            $userAvailability = ($data['is_completed'] == 1) ? 'available' : 'busy';
+            $this->setAvailability($thisTask['assigned_to'], $userAvailability);
+        }
+    }
+    
+    public function setAvailability($userId, $availability) {
+        // Define valid availability states
+        $validStates = ['available', 'busy', 'unavailable'];
+    
+        // Check if the provided availability state is valid
+        if (!in_array($availability, $validStates)) {
+            throw new InvalidArgumentException("Invalid availability state. Valid states are: 'available', 'busy', 'unavailable'.");
+        }
+    
+        // Update the availability in the database
+        $stmt = $this->db->prepare("UPDATE users SET availability = :availability WHERE id = :id");
+        $stmt->execute([
+            'availability' => $availability,
+            'id' => $userId,
         ]);
     }
-
+    
+    
     public function deleteTask($id) {
         $stmt = $this->db->prepare("UPDATE tasks SET is_deleted = 1 WHERE id = :id");
         $stmt->execute(['id' => $id]);

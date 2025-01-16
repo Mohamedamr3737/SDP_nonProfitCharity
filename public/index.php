@@ -16,11 +16,12 @@ require '../controllers/TaskController.php';
 
 $authController = new AuthController();
 $model = new EventModel(Database::getInstance()->getConnection());
+$userModel= new User(Database::getInstance()->getConnection());
 $donationController = new DonationController();
 if (isset($_SESSION['user_id'])) {
 $eventController = new EventController($model, $_SESSION['user_id']);
 $taskModel = new TaskModel(Database::getInstance()->getConnection());
-$taskController = new TaskController($taskModel, $_SESSION['user_id']);
+$taskController = new TaskController($taskModel, $_SESSION['user_id'], $userModel);
 }
 // $taskController = new TaskController();
 
@@ -75,6 +76,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     } elseif ($uri === 'tasks/undo') {
         $taskController->undo();
         header('Location: /tasks/list');
+    }elseif ($uri === 'tasks/available') {
+        $availableTasks = $taskController->getAvailableTasks();
+        include '../views/tasks/available.php';
     }
      else {
         echo "Page not found.";
@@ -125,6 +129,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     } elseif ($uri === 'tasks/delete') {
         $taskController->deleteTask($_POST['id']);
         header('Location: /tasks/list');
+    }elseif ($uri === 'tasks/assign') {
+        $response = $taskController->assignTask($_POST['task_id']);
+        echo json_encode(['message' => $response]);
     }
     else {
         echo "Invalid action.";

@@ -9,7 +9,7 @@ CREATE TABLE if NOT EXISTS users (
     login_type ENUM('email', 'social') NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     skills TEXT NOT NULL,
-    availability ENUM('available', 'unavailable') DEFAULT 'available',
+    availability ENUM('available', 'unavailable', 'busy') DEFAULT 'available',
     hours_worked INT DEFAULT 0
 );
 
@@ -39,13 +39,16 @@ CREATE TABLE events (
 
 CREATE TABLE tasks (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    event_id INT NOT NULL,
+    event_id INT NULL,
     name VARCHAR(255) NOT NULL,
     required_skill VARCHAR(255) NOT NULL,
     is_completed TINYINT(1) DEFAULT 0,
     last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     is_deleted TINYINT(1) DEFAULT 0,
-    FOREIGN KEY (event_id) REFERENCES events(id)
+    assigned_to INT NULL,
+    FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE SET NULL,
+    FOREIGN KEY (assigned_to) REFERENCES users(id) ON DELETE SET NULL
+
 );
 
 /* tasks need hours */

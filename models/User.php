@@ -89,6 +89,32 @@ class User extends BaseModel {
         ] ;
         }
     }
+    public function setAvailability($userId, $availability) {
+        // Define valid availability states
+        $validStates = ['available', 'busy', 'unavailable'];
+    
+        // Check if the provided availability state is valid
+        if (!in_array($availability, $validStates)) {
+            throw new InvalidArgumentException("Invalid availability state. Valid states are: 'available', 'busy', 'unavailable'.");
+        }
+    
+        // Update the availability in the database
+        $stmt = $this->db->prepare("UPDATE users SET availability = :availability WHERE id = :id");
+        $stmt->execute([
+            'availability' => $availability,
+            'id' => $userId,
+        ]);
+    }
+    
+    public function findAvailableUsersBySkill($skill) {
+        $stmt = $this->db->prepare("
+            SELECT * FROM users 
+            WHERE skills LIKE :skill AND availability = 'available'
+        ");
+        $stmt->execute(['skill' => '%' . $skill . '%']);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    
 }
 
 ?>
