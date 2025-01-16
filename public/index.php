@@ -5,12 +5,19 @@ require '../config/Database.php';
 require '../controllers/AuthController.php';
 require '../controllers/DonationController.php';
 require '../controllers/EventController.php';
-// require '../controllers/TaskController.php';
+require '../controllers/TaskController.php';
+
+// Check if user is logged in
+if (!isset($_SESSION['user_id'])) {
+    $_SESSION['user_id'] = null; // You can assign null or redirect to login page
+}
 
 $authController = new AuthController();
 $model = new EventModel(Database::getInstance()->getConnection());
 $donationController = new DonationController();
 $eventController = new EventController($model, $_SESSION['user_id']);
+$taskModel = new TaskModel(Database::getInstance()->getConnection());
+$taskController = new TaskController($taskModel, $_SESSION['user_id']);
 // $taskController = new TaskController();
 
 // Get the requested URI
@@ -55,10 +62,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     } elseif ($uri === 'events/undo') {
         $eventController->undo();
         header('Location: /events/list');
-    } elseif ($uri === 'events/redo') {
-        $eventController->redo();
-        header('Location: /events/list');
-    } 
+    }    elseif ($uri === 'tasks/list') {
+        include '../views/tasks/list.php';
+    } elseif ($uri === 'tasks/add') {
+        include '../views/tasks/add.php';
+    } elseif ($uri === 'tasks/edit') {
+        include '../views/tasks/edit.php';
+    } elseif ($uri === 'tasks/undo') {
+        $taskController->undo();
+        header('Location: /tasks/list');
+    }
      else {
         echo "Page not found.";
     }
@@ -99,6 +112,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     } elseif ($uri === 'events/delete') {
         $eventController->deleteEvent($_POST['id']);
         header('Location: /events/list');
+    }    elseif ($uri === 'tasks/create') {
+        $taskController->addTask($_POST);
+        header('Location: /tasks/list');
+    } elseif ($uri === 'tasks/update') {
+        $taskController->editTask($_POST['id'], $_POST);
+        header('Location: /tasks/list');
+    } elseif ($uri === 'tasks/delete') {
+        $taskController->deleteTask($_POST['id']);
+        header('Location: /tasks/list');
     }
     else {
         echo "Invalid action.";

@@ -71,9 +71,10 @@ CREATE TABLE actions (
 CREATE TABLE action_history (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
+    entity_type ENUM('task', 'event') NOT NULL,
     action_type ENUM('add', 'edit', 'delete') NOT NULL,
-    event_id INT NOT NULL,
-    event_data JSON NOT NULL,
+    entity_id INT NOT NULL,
+    entity_data JSON NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

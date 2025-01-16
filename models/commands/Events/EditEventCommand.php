@@ -25,7 +25,7 @@ class EditEventCommand implements Command {
     public function undo() {
         $action = $this->model->getLastAction($this->userId);
         if ($action) {
-            $eventData = json_decode($action['event_data'], true);
+            $eventData = json_decode($action['entity_data'], true);
         if ($eventData) {
             $this->model->updateEvent($eventData['id'], $eventData);
         }

@@ -3,7 +3,7 @@ require_once __DIR__. '/../core/BaseModel.php';
 
 class EventModel extends BaseModel {
     public function getAllEvents() {
-        $stmt = $this->db->query("SELECT * FROM events");
+        $stmt = $this->db->query("SELECT * FROM events WHERE is_deleted = 0" );
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
@@ -34,49 +34,38 @@ class EventModel extends BaseModel {
     }
 
     public function deleteEvent($id) {
-        $stmt = $this->db->prepare("DELETE FROM events WHERE id = :id");
+        $stmt = $this->db->prepare("UPDATE events SET is_deleted = 1 WHERE id = :id");
+        // $stmt = $this->db->prepare("DELETE FROM events WHERE id = :id");
         $stmt->execute(['id' => $id]);
     }
 
     public function restoreEvent($data) {
-        $stmt = $this->db->prepare(
-            "INSERT INTO events (id, name, date, location) VALUES (:id, :name, :date, :location)"
-        );
-        $stmt->execute([
-            'id' => $data['id'],
-            'name' => $data['name'],
-            'date' => $data['date'],
-            'location' => $data['location'],
-        ]);
+        $stmt = $this->db->prepare("UPDATE events SET is_deleted = 0 WHERE id = :id");
+        error_log($data['id']);
+        $stmt->execute(['id' => $data['id']]);
     }
 
-    public function saveAction($userId, $actionType, $eventId, $eventData) {
+    public function  saveAction($userId, $actionType, $eventId, $eventData) {
         $stmt = $this->db->prepare(
-            "INSERT INTO action_history (user_id, action_type, event_id, event_data) VALUES (:user_id, :action_type, :event_id, :event_data)"
+            "INSERT INTO action_history (user_id, action_type, entity_id, entity_data, entity_type) VALUES (:user_id, :action_type, :entity_id, :entity_data, :entity_type)"
         );
         $stmt->execute([
             'user_id' => $userId,
             'action_type' => $actionType,
-            'event_id' => $eventId,
-            'event_data' => json_encode($eventData),
+            'entity_id' => $eventId,
+            'entity_data' => json_encode($eventData),
+            'entity_type' => 'event',
         ]);
     }
 
     public function getLastAction($userId) {
         $stmt = $this->db->prepare(
-            "SELECT * FROM action_history WHERE user_id = :user_id ORDER BY id DESC LIMIT 1"
+            "SELECT * FROM action_history WHERE (user_id = :user_id AND entity_type = 'event')  ORDER BY id DESC LIMIT 1"
         );
         $stmt->execute(['user_id' => $userId]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
     
-    public function getLastRedoAction($userId) {
-        $stmt = $this->db->prepare(
-            "SELECT * FROM action_history WHERE user_id = :user_id AND action_type = 'redo' ORDER BY id DESC LIMIT 1"
-        );
-        $stmt->execute(['user_id' => $userId]);
-        return $stmt->fetch(PDO::FETCH_ASSOC);
-    }
     
     public function removeAction($actionId) {
         $stmt = $this->db->prepare("DELETE FROM action_history WHERE id = :id");

@@ -44,14 +44,14 @@ class EventController {
     public function undo() {
         $action = $this->model->getLastAction($this->userId);
         if ($action) {
-            $eventData = json_decode($action['event_data'], true);
+            $eventData = json_decode($action['entity_data'], true);
 
             if ($action['action_type'] === 'add') {
                 $command = new AddEventCommand($this->model, $this->userId, $eventData);
             } elseif ($action['action_type'] === 'edit') {
-                $command = new EditEventCommand($this->model, $this->userId, $action['event_id'], $eventData);
+                $command = new EditEventCommand($this->model, $this->userId, $action['entity_id'], $eventData);
             } elseif ($action['action_type'] === 'delete') {
-                $command = new DeleteEventCommand($this->model, $this->userId, $action['event_id']);
+                $command = new DeleteEventCommand($this->model, $this->userId, $action['entity_id']);
             }
 
             $command->undo();

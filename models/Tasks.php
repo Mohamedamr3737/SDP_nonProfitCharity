@@ -1,95 +1,87 @@
 <?php
-class TaskModel extends BaseModel {    
-    public function createTask($data) {
-    $stmt = $this->db->prepare("INSERT INTO tasks (event_id, name, required_skill) VALUES (:event_id, :name, :required_skill)");
-    $stmt->execute($data);
-    $taskId = $this->db->lastInsertId();
+require_once __DIR__ . '/../core/BaseModel.php';
 
-    // Log the 'add' action in the actions table
-    $stmt = $this->db->prepare("INSERT INTO actions (entity_type, entity_id, action_type, previous_data, user_id) 
-                                VALUES ('task', :entity_id, 'add', NULL, :user_id)");
-    $stmt->execute(['entity_id' => $taskId, 'user_id' => $_SESSION['user_id']]);
-
-    return $taskId;
-    }
-
-    public function getTasksByEvent($eventId, $includeDeleted = false) {
-        $query = $includeDeleted 
-            ? "SELECT * FROM tasks WHERE event_id = :event_id" 
-            : "SELECT * FROM tasks WHERE event_id = :event_id AND is_deleted = 0";
-        $stmt = $this->db->prepare($query);
+class TaskModel extends BaseModel {
+    public function getAllTasksByEvent($eventId) {
+        $stmt = $this->db->prepare("SELECT * FROM tasks WHERE event_id = :event_id AND is_deleted = 0");
         $stmt->execute(['event_id' => $eventId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function getTaskById($id) {
-        $stmt = $this->db->prepare("SELECT * FROM tasks WHERE id = :id");
+    public function getTask($id) {
+        $stmt = $this->db->prepare("SELECT * FROM tasks WHERE id = :id AND is_deleted = 0");
         $stmt->execute(['id' => $id]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function updateTask($id, $data) {
-        $existingData = $this->getTaskById($id);
-        $stmt = $this->db->prepare("UPDATE tasks SET name = :name, required_skill = :required_skill WHERE id = :id");
-        $stmt->execute(array_merge($data, ['id' => $id]));
+    public function getAllTasks() {
+        $stmt = $this->db->query(
+            "SELECT tasks.*, events.name AS event_name 
+            FROM tasks 
+            LEFT JOIN events ON tasks.event_id = events.id 
+            WHERE tasks.is_deleted = 0"
+        );
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 
-        // Log the 'update' action in the actions table
-        $stmt = $this->db->prepare("INSERT INTO actions (entity_type, entity_id, action_type, previous_data, user_id) 
-                                    VALUES ('task', :entity_id, 'update', :previous_data, :user_id)");
+    public function createTask($data) {
+        $stmt = $this->db->prepare("INSERT INTO tasks (event_id, name, required_skill, is_completed) VALUES (:event_id, :name, :required_skill, :is_completed)");
         $stmt->execute([
-            'entity_id' => $id,
-            'previous_data' => json_encode($existingData),
-            'user_id' => $_SESSION['user_id']
+            'event_id' => $data['event_id'],
+            'name' => $data['name'],
+            'required_skill' => $data['required_skill'],
+            'is_completed' => $data['is_completed'] ?? 0,
         ]);
+        return $this->db->lastInsertId();
+    }
 
-        return true;
+    public function updateTask($id, $data) {
+        error_log("Executing SQL: UPDATE tasks SET name = '{$data['name']}', required_skill = '{$data['required_skill']}', is_completed = {$data['is_completed']} WHERE id = {$id}");
+        $stmt = $this->db->prepare("UPDATE tasks SET name = :name, required_skill = :required_skill, is_completed = :is_completed WHERE id = :id");
+        $stmt->execute([
+            'name' => $data['name'],
+            'required_skill' => $data['required_skill'],
+            'is_completed' => $data['is_completed'] ?? 0,
+            'id' => $id,
+        ]);
     }
 
     public function deleteTask($id) {
         $stmt = $this->db->prepare("UPDATE tasks SET is_deleted = 1 WHERE id = :id");
         $stmt->execute(['id' => $id]);
-
-        // Log the 'delete' action in the actions table
-        $stmt = $this->db->prepare("INSERT INTO actions (entity_type, entity_id, action_type, previous_data, user_id) 
-                                    VALUES ('task', :entity_id, 'delete', NULL, :user_id)");
-        $stmt->execute(['entity_id' => $id, 'user_id' => $_SESSION['user_id']]);
-
-        return true;
     }
-    public function restoreTask($id) {
+
+    public function saveAction($userId, $actionType, $taskId, $taskData) {
+        $stmt = $this->db->prepare(
+            "INSERT INTO action_history (user_id, action_type, entity_id, entity_data, entity_type) VALUES (:user_id, :action_type, :entity_id, :entity_data, :entity_type)"
+        );
+        $stmt->execute([
+            'user_id' => $userId,
+            'action_type' => $actionType,
+            'entity_id' => $taskId,
+            'entity_data' => json_encode($taskData),
+            'entity_type' => 'task',
+        ]);
+    }
+
+    public function getLastAction($userId) {
+        $stmt = $this->db->prepare(
+            "SELECT * FROM action_history WHERE user_id = :user_id AND entity_type = 'task' ORDER BY id DESC LIMIT 1"
+        );
+        $stmt->execute(['user_id' => $userId]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function removeAction($actionId) {
+        $stmt = $this->db->prepare("DELETE FROM action_history WHERE id = :id");
+        $stmt->execute(['id' => $actionId]);
+    }
+
+    public function restoreTask($data) {
         $stmt = $this->db->prepare("UPDATE tasks SET is_deleted = 0 WHERE id = :id");
-        $stmt->execute(['id' => $id]);
-
-        return true;
+        error_log($data['id']);
+        $stmt->execute(['id' => $data['id']]);
     }
 
-    // Get the last action of a user
-    public function getLastAction($entityType) {
-        $stmt = $this->db->prepare("SELECT * FROM actions WHERE entity_type = :entity_type AND user_id = :user_id AND is_undone = 0 ORDER BY created_at DESC LIMIT 1");
-        $stmt->execute([
-            'entity_type' => $entityType,
-            'user_id' => $_SESSION['user_id'],
-        ]);
-        return $stmt->fetch(PDO::FETCH_ASSOC);
-    }
-
-    // Get the last undone action
-    public function getLastUndoneAction($entityType) {
-        $stmt = $this->db->prepare("SELECT * FROM actions WHERE entity_type = :entity_type AND user_id = :user_id AND is_undone = 1 ORDER BY created_at DESC LIMIT 1");
-        $stmt->execute([
-            'entity_type' => $entityType,
-            'user_id' => $_SESSION['user_id'],
-        ]);
-        return $stmt->fetch(PDO::FETCH_ASSOC);
-    }
-
-    public function markActionAsUndone($actionId) {
-        $stmt = $this->db->prepare("UPDATE actions SET is_undone = 1 WHERE id = :id");
-        $stmt->execute(['id' => $actionId]);
-    }
-
-    public function markActionAsActive($actionId) {
-        $stmt = $this->db->prepare("UPDATE actions SET is_undone = 0 WHERE id = :id");
-        $stmt->execute(['id' => $actionId]);
-    }
 }
+?>
