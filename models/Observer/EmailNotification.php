@@ -25,7 +25,7 @@ class EmailNotification implements Observer {
             $mail->Host = 'smtp.gmail.com';
             $mail->SMTPAuth = true;
             $mail->Username = 'mohamedamr2002a@gmail.com'; 
-            $mail->Password = 'cajx ywnd posh tcuz';
+            $mail->Password = 'hfhe yyju nfdm rfyd';
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port = 587;
 

@@ -10,6 +10,7 @@ class User extends BaseModel {
     private $email;
     private $password;
     private $login_type;
+    private $skills;
 
     public function __constructUser($data) {
         $this->firstName = $data['firstName'];
@@ -19,6 +20,7 @@ class User extends BaseModel {
         $this->email = $data['email'];
         $this->password = $data['password'];
         $this->login_type = $data['login_type'];
+        $this->skills = $data['skills'];
     }
     public function getName() {
         return $this->firstName ." " . $this->lastName;
@@ -33,6 +35,10 @@ class User extends BaseModel {
 
     public function getId() {
         return $this->id;
+        }
+
+    public function getSkill() {
+        return $this->skills;
         }
     
     public function findByEmail($email) {
@@ -49,6 +55,7 @@ class User extends BaseModel {
             $this->email = $user['email'];
             $this->password = $user['password'];
             $this->login_type = $user['login_type'];
+            $this->skills = $user['skills'];
             return true;
         }
         return false;
@@ -58,7 +65,7 @@ class User extends BaseModel {
     public function register(User $user) {
         try{
         $hashedPassword = password_hash($this->password, PASSWORD_BCRYPT);
-        $stmt = $this->db->prepare("INSERT INTO users (firstName, lastName, phone, type, email, password, login_type) VALUES (:firstName, :lastName, :phone, :type, :email, :password, :login_type  )");
+        $stmt = $this->db->prepare("INSERT INTO users (firstName, lastName, phone, type, email, password, login_type, skills) VALUES (:firstName, :lastName, :phone, :type, :email, :password, :login_type, :skills)");
         $stmt->execute([
             'firstName' => $this->firstName,
             'lastName' => $this->lastName,
@@ -67,6 +74,7 @@ class User extends BaseModel {
             'email' => $this->email,
             'password' => $hashedPassword,
             'login_type' => $this->login_type,
+            'skills' => $this->skills,
         ]);
 
         return[

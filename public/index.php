@@ -8,16 +8,20 @@ require '../controllers/EventController.php';
 require '../controllers/TaskController.php';
 
 // Check if user is logged in
-if (!isset($_SESSION['user_id'])) {
-    $_SESSION['user_id'] = null; // You can assign null or redirect to login page
-}
+
+// error_log(!isset($_SESSION['user_id']));
+// if (!isset($_SESSION['user_id'])) {
+//     $_SESSION['user_id'] = 100000000; // You can assign null or redirect to login page
+// }
 
 $authController = new AuthController();
 $model = new EventModel(Database::getInstance()->getConnection());
 $donationController = new DonationController();
+if (isset($_SESSION['user_id'])) {
 $eventController = new EventController($model, $_SESSION['user_id']);
 $taskModel = new TaskModel(Database::getInstance()->getConnection());
 $taskController = new TaskController($taskModel, $_SESSION['user_id']);
+}
 // $taskController = new TaskController();
 
 // Get the requested URI

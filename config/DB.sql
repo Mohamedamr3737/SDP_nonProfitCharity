@@ -33,6 +33,9 @@ CREATE TABLE events (
     last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     is_deleted TINYINT(1) DEFAULT 0
 );
+/* events need price */
+/* add certificates table */
+/*  */
 
 CREATE TABLE tasks (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -44,6 +47,8 @@ CREATE TABLE tasks (
     is_deleted TINYINT(1) DEFAULT 0,
     FOREIGN KEY (event_id) REFERENCES events(id)
 );
+
+/* tasks need hours */
 
 
 CREATE TABLE task_assignments (
