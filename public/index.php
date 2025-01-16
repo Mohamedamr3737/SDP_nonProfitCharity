@@ -21,7 +21,7 @@ $donationController = new DonationController();
 if (isset($_SESSION['user_id'])) {
 $eventController = new EventController($model, $_SESSION['user_id']);
 $taskModel = new TaskModel(Database::getInstance()->getConnection());
-$taskController = new TaskController($taskModel, $_SESSION['user_id'], $userModel);
+$taskController = new TaskController($taskModel, $_SESSION['user_id']);
 }
 // $taskController = new TaskController();
 
