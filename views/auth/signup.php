@@ -17,10 +17,22 @@
 
     <div class="mb-4">
         <label class="form-label mb-2" for="type">Type</label>
-        <select class="form-control" name="type" required>
+        <select class="form-control" name="type" id="typeSelect" required>
             <option value="donor">Donor</option>
             <option value="volunteer">volunteer</option>
             <option value="beneficiary">Beneficiary</option>
+        </select>
+    </div>
+
+        <!-- Hidden skills dropdown for volunteers -->
+    <div class="mb-4 d-none" id="skillsDropdown">
+        <label class="form-label mb-2" for="skills">Select Your Skill</label>
+        <select class="form-control" name="skills">
+            <option value="teaching">Teaching</option>
+            <option value="coding">Coding</option>
+            <option value="healthcare">Healthcare</option>
+            <option value="event_management">Event Management</option>
+            <option value="others">Others</option>
         </select>
     </div>
 
@@ -54,6 +66,17 @@
     </div>
 </form>
 <script>
+
+// JavaScript to toggle skills dropdown based on type selection
+document.getElementById("typeSelect").addEventListener("change", function () {
+        const skillsDropdown = document.getElementById("skillsDropdown");
+
+        if (this.value === "volunteer") {
+            skillsDropdown.classList.remove("d-none");
+        } else {
+            skillsDropdown.classList.add("d-none");
+        }
+    });
 document.getElementById("signForm").addEventListener("submit", function(e) {
     e.preventDefault(); // Prevent default form submission
 
