@@ -120,6 +120,8 @@ class User extends BaseModel {
         $stmt->execute(['skill' => '%' . $skill . '%']);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    
     
 }
 

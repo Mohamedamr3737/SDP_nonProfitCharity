@@ -6,6 +6,7 @@ require '../controllers/AuthController.php';
 require '../controllers/DonationController.php';
 require '../controllers/EventController.php';
 require '../controllers/TaskController.php';
+require '../controllers/BenefeciaryNeedsController.php';
 
 // Check if user is logged in
 
@@ -21,6 +22,7 @@ if (isset($_SESSION['user_id'])) {
 $eventController = new EventController($model, $_SESSION['user_id']);
 $taskModel = new TaskModel(Database::getInstance()->getConnection());
 $taskController = new TaskController($taskModel, $_SESSION['user_id']);
+$BenefeciaryNeedsController = new BenefeciaryNeedsController();
 }
 // $taskController = new TaskController();
 
@@ -93,6 +95,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         } else {
             echo "Failed to generate certificate.";
         }
+    }elseif ($uri === 'admin/add_needs') {
+        $beneficiaries = $BenefeciaryNeedsController->getAllBeneficiaries();
+        include '../views/beneficiaries/addNeeds.php';
+    }elseif ($uri === 'admin/view_needs') {
+        $beneficiaryId = $_GET['beneficiary_id'] ?? null;
+        $needs = $beneficiaryId
+            ? $BenefeciaryNeedsController->getBeneficiaryNeeds($beneficiaryId)
+            : $BenefeciaryNeedsController->getAllBeneficiaryNeeds();
+    
+        include '../views/beneficiaries/viewNeeds.php';
+    }elseif ($uri === 'admin/add_beneficiary') {
+        include '../views/beneficiaries/addBeneficiary.php';
+    }elseif ($uri === 'admin/list_beneficiaries') {
+        $beneficiaries = $BenefeciaryNeedsController->getAllBeneficiaries();
+        include '../views/beneficiaries/listBeneficiaries.php';
     }
      else {
         echo "Page not found.";
@@ -146,6 +163,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     }elseif ($uri === 'tasks/assign') {
         $response = $taskController->assignTask($_POST['task_id']);
         echo json_encode(['message' => $response]);
+    }elseif ($uri === 'admin/assign_needs') {
+        $beneficiaryId = $_POST['beneficiary_id'];
+        $selectedNeeds = [
+            'vegetables' => $_POST['vegetables'] ?? null,
+            'meat' => $_POST['meat'] ?? null,
+            'money' => $_POST['money'] ?? null,
+            'service' => $_POST['service'] ?? null,
+        ];
+        $message = $BenefeciaryNeedsController->assignNeeds($beneficiaryId, $selectedNeeds);
+        echo $message;
     }
     else {
         echo "Invalid action.";

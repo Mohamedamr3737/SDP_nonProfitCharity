@@ -87,6 +87,13 @@ CREATE TABLE action_history (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE beneficiary_needs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    beneficiary_id INT NOT NULL,
+    description TEXT NOT NULL, -- JSON-encoded needs
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (beneficiary_id) REFERENCES users(id)
+);
 
 
 

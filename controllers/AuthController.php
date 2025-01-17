@@ -25,9 +25,18 @@ class AuthController extends BaseController {
     }
 
     public function signup($data) {
+
+        if ($data['type'] === 'beneficiary') {
+            $data['email'] = '';
+            $data['password'] = '';
+            $data['rePassword'] = ''; // Match empty passwords
+            $data['login_type'] = '';
+            $data['skills'] = '';
+        }
+
         $this->userModel->__constructUser($data);
 
-        if($data['password']==$data['rePassword']){
+        if($data['type'] === 'beneficiary' || $data['password']==$data['rePassword']){
         // Call the User model's register method
         $response=$this->userModel->register($this->userModel);
 
