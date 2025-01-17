@@ -4,6 +4,7 @@ CREATE TABLE if NOT EXISTS users (
     lastName VARCHAR(50) NOT NULL,
     phone VARCHAR(15) NOT NULL UNIQUE,
     type ENUM('donor', 'volunteer','beneficiary','admin') NOT NULL,
+    role ENUM('super_admin', 'donations_admin', 'payment_admin', 'user') DEFAULT 'user',
     email VARCHAR(100) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     login_type ENUM('email', 'social') NOT NULL,
@@ -21,6 +22,7 @@ CREATE TABLE if NOT EXISTS donations (
     amount DECIMAL(10, 2),            -- For money donations
     product_name VARCHAR(100),        -- For product donations
     service_description TEXT,         -- For service donations
+    state ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (donorId) REFERENCES users(id) ON DELETE SET NULL
 );
@@ -64,17 +66,6 @@ CREATE TABLE task_assignments (
 );
 
 
-CREATE TABLE actions (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    entity_type ENUM('task', 'event') NOT NULL,
-    entity_id INT NOT NULL,
-    action_type ENUM('add', 'update', 'delete') NOT NULL,
-    previous_data TEXT,
-    user_id INT NOT NULL,
-    is_undone TINYINT(1) DEFAULT 0,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id)
-);
 
 
 CREATE TABLE action_history (

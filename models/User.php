@@ -11,6 +11,7 @@ class User extends BaseModel {
     private $password;
     private $login_type;
     private $skills;
+    private $role;
 
     public function __constructUser($data) {
         $this->firstName = $data['firstName'];
@@ -40,6 +41,10 @@ class User extends BaseModel {
     public function getSkill() {
         return $this->skills;
         }
+    public function getRole() {
+        return $this->role;
+        }
+    
     
     public function findByEmail($email) {
         $stmt = $this->db->prepare("SELECT * FROM users WHERE email = :email");
@@ -56,6 +61,7 @@ class User extends BaseModel {
             $this->password = $user['password'];
             $this->login_type = $user['login_type'];
             $this->skills = $user['skills'];
+            $this->role= $user['role'];
             return true;
         }
         return false;
@@ -118,6 +124,16 @@ class User extends BaseModel {
             WHERE skills LIKE :skill AND availability = 'available'
         ");
         $stmt->execute(['skill' => '%' . $skill . '%']);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    public function updateRole($userId, $role) {
+        $stmt = $this->db->prepare("UPDATE users SET role = :role WHERE id = :id");
+        $stmt->execute(['role' => $role, 'id' => $userId]);
+        return $stmt->rowCount();
+    }
+
+    public function getAllUsers() {
+        $stmt = $this->db->query("SELECT id, firstName, lastName, email, role FROM users");
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 

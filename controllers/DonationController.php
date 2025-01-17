@@ -88,4 +88,5 @@ public function generateReceiptAndProcessPayment($data, $applyTax = true) {
             return "Error saving donation: " . $e->getMessage();
         }
     }
+    
 }

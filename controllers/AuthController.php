@@ -21,7 +21,7 @@ class AuthController extends BaseController {
         parent::__construct();
         $this->userModel = new User(Database::getInstance()->getConnection());
         $this->loginContext = new LoginContext();
-        session_start();
+        // session_start();
     }
 
     public function signup($data) {
@@ -70,6 +70,7 @@ class AuthController extends BaseController {
             $_SESSION['user_name'] = $this->userModel->getName();
             $_SESSION['user_email'] = $this->userModel->getEmail();
             $_SESSION['user_type'] = $this->userModel->getType();
+            $_SESSION['user_role'] = $this->userModel->getRole();
             $response['statusCode']=200;
             return jsonResponse($response);
         } else{

@@ -7,6 +7,9 @@ require '../controllers/DonationController.php';
 require '../controllers/EventController.php';
 require '../controllers/TaskController.php';
 require '../controllers/BenefeciaryNeedsController.php';
+require '../models/Proxy/AccessControlProxy.php';
+require '../controllers/AdminDonationController.php';
+require '../controllers/AdminController.php';
 
 // Check if user is logged in
 
@@ -15,14 +18,30 @@ require '../controllers/BenefeciaryNeedsController.php';
 //     $_SESSION['user_id'] = 100000000; // You can assign null or redirect to login page
 // }
 
+// Start the session
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+if (!isset($_SESSION['user_role'])) {
+    $_SESSION['user_role'] = 'user';
+}
+
 $authController = new AuthController();
 $model = new EventModel(Database::getInstance()->getConnection());
 $donationController = new DonationController();
+$BenefeciaryNeedsController = new BenefeciaryNeedsController();
+$AdminDonationController = new AdminDonationController();
+$AdminController = new AdminController();
+$adminProxy = new AccessControlProxy($AdminController, $_SESSION['user_role']);
+$donationProxy = new AccessControlProxy($AdminDonationController, $_SESSION['user_role']);
+$AdminPaymentController= new AdminPaymentController();
+$paymentProxy = new AccessControlProxy($AdminPaymentController, $_SESSION['user_role']);
+
 if (isset($_SESSION['user_id'])) {
 $eventController = new EventController($model, $_SESSION['user_id']);
 $taskModel = new TaskModel(Database::getInstance()->getConnection());
 $taskController = new TaskController($taskModel, $_SESSION['user_id']);
-$BenefeciaryNeedsController = new BenefeciaryNeedsController();
 }
 // $taskController = new TaskController();
 
@@ -95,7 +114,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         } else {
             echo "Failed to generate certificate.";
         }
-    }elseif ($uri === 'admin/add_needs') {
+    }
+    elseif ($uri === 'admin/add_needs') {
         $beneficiaries = $BenefeciaryNeedsController->getAllBeneficiaries();
         include '../views/beneficiaries/addNeeds.php';
     }elseif ($uri === 'admin/add_beneficiary') {
@@ -107,6 +127,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $needs = $BenefeciaryNeedsController->getAllBeneficiaryNeeds();
         include '../views/beneficiaries/manageNeeds.php';
     }    
+    //from here is the admin routes
+    elseif ($uri === 'admin/dashboard') {
+        $adminProxy->handleRequest('super_admin','../views/admin/dashboard.php'); // Check if the user has the 'admin' role
+    }
+     elseif ($uri === 'admin/users') {
+        $users = $adminProxy->handleRequest('super_admin', null, 'viewUsers');
+        include '../views/admin/users.php';
+    } elseif ($uri === 'admin/donations') {
+        $donations = $donationProxy->handleRequest('donation_admin', null,'viewDonations' );
+        include '../views/admin/donations.php';
+    } elseif ($uri === 'admin/payments') {
+        $payments = $paymentProxy->handleRequest('payment_admin', null,'viewPayments' );
+        include '../views/admin/payments.php';
+    }
      else {
         echo "Page not found.";
     }
@@ -160,25 +194,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     }elseif ($uri === 'tasks/assign') {
         $response = $taskController->assignTask($_POST['task_id']);
         echo json_encode(['message' => $response]);
-    }elseif ($uri === 'admin/assign_needs') {
-        $beneficiaryId = $_POST['beneficiary_id'];
-        $selectedNeeds = [
-            'vegetables' => $_POST['vegetables'] ?? null,
-            'meat' => $_POST['meat'] ?? null,
-            'money' => $_POST['money'] ?? null,
-            'service' => $_POST['service'] ?? null,
-        ];
-        $message = $BenefeciaryNeedsController->assignNeeds($beneficiaryId, $selectedNeeds);
-        echo $message;
-    } elseif ($uri === 'beneficiaries/change_need_state') {
-        error_log(json_encode($_POST));
-        $response = $BenefeciaryNeedsController->changeNeedState($_POST['id'], $_POST['action']);
-        header('Location: /admin/manage_needs');
-        exit;
-    } elseif ($uri === 'beneficiaries/delete_need') {
-        $response = $BenefeciaryNeedsController->deleteNeed($_POST['id']);
-        header('Location: /admin/manage_needs');
-        exit;
+    }
+    // elseif ($uri === 'admin/assign_needs') {
+    //     $beneficiaryId = $_POST['beneficiary_id'];
+    //     $selectedNeeds = [
+    //         'vegetables' => $_POST['vegetables'] ?? null,
+    //         'meat' => $_POST['meat'] ?? null,
+    //         'money' => $_POST['money'] ?? null,
+    //         'service' => $_POST['service'] ?? null,
+    //     ];
+    //     $message = $BenefeciaryNeedsController->assignNeeds($beneficiaryId, $selectedNeeds);
+    //     echo $message;
+    // } elseif ($uri === 'beneficiaries/change_need_state') {
+    //     error_log(json_encode($_POST));
+    //     $response = $BenefeciaryNeedsController->changeNeedState($_POST['id'], $_POST['action']);
+    //     header('Location: /admin/manage_needs');
+    //     exit;
+    // } elseif ($uri === 'beneficiaries/delete_need') {
+    //     $response = $BenefeciaryNeedsController->deleteNeed($_POST['id']);
+    //     header('Location: /admin/manage_needs');
+    //     exit;
+    // }
+    // //from here is the admin post
+    elseif ($uri === 'admin/assign_role') {
+        $adminProxy->handleRequest('super_admin', null, 'assignRole',$_POST['user_id'],$_POST['role'] );
+        // $adminController->assignRole($_POST['user_id'], $_POST['role']);
+        header('Location: /admin/users');
     }
     else {
         echo "Invalid action.";
