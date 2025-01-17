@@ -71,6 +71,56 @@ class EventModel extends BaseModel {
         $stmt = $this->db->prepare("DELETE FROM action_history WHERE id = :id");
         $stmt->execute(['id' => $actionId]);
     }
+    public function getFutureEvents() {
+        $stmt = $this->db->prepare("SELECT * FROM events WHERE date >= CURDATE() AND is_deleted = 0 ORDER BY date ASC");
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    public function registerForEvent($userId, $eventId) {
+        $stmt = $this->db->prepare("
+            INSERT INTO event_registrations (user_id, event_id)
+            VALUES (:user_id, :event_id)
+        ");
+        $stmt->execute([
+            'user_id' => $userId,
+            'event_id' => $eventId
+        ]);
+        return true;
+    }
+    public function markAttendance($registrationId) {
+        if (empty($registrationId)) {
+            throw new Exception("Registration ID cannot be null.");
+        }
+    
+        $stmt = $this->db->prepare("
+            UPDATE event_registrations
+            SET is_attended = 1
+            WHERE id = :registration_id
+        ");
+        $stmt->execute(['registration_id' => $registrationId]);
+    
+        return $stmt->rowCount() > 0; // Returns true if rows are affected
+    }
+    
+    public function getEventRegistrations() {
+        $stmt = $this->db->prepare("
+            SELECT 
+                er.id AS registration_id, 
+                u.firstName AS user_first_name, 
+                u.email AS user_email, 
+                e.name AS event_name, 
+                er.is_attended
+            FROM event_registrations er
+            JOIN users u ON er.user_id = u.id
+            JOIN events e ON er.event_id = e.id
+        ");
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    
+    
+    
+    
     
 }
 

@@ -71,6 +71,13 @@
                         <div class="d-none d-lg-block ms-lg-3">
                             <a class="btn custom-btn  custom-border-btn"  href="/logout" role="button" >Logout</a>
                         </div>
+
+                        <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] !== 'user'): ?>
+                            <div class="d-none d-lg-block ms-lg-3">
+                                <a class="btn custom-btn custom-border-btn" href="/admin/dashboard" role="button">Admin</a>
+                            </div>
+                        <?php endif; ?>
+
                     </div>
                 </div>
             </nav>
@@ -311,6 +318,56 @@
 
 
         </main>
+
+        <section id="events" class="section-padding">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12 col-12 text-center mb-lg-5 mb-4">
+                <h2>Upcoming Events</h2>
+            </div>
+
+            <?php
+            // Get the future events as an array
+            $futureEvents = $eventController->getFutureEvents();
+
+            // Initialize the EventIterator
+            $eventIterator = new EventIterator($futureEvents);
+
+            // Use the EventIterator to loop through events
+            for ($eventIterator->rewind(); $eventIterator->valid(); $eventIterator->next()) {
+                $event = $eventIterator->current();
+            ?>
+                <div class="col-lg-4 col-md-6 col-12 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title"><?= htmlspecialchars($event['name']); ?></h5>
+                            <p class="card-text"><strong>Date:</strong> <?= htmlspecialchars($event['date']); ?></p>
+                            <p class="card-text"><strong>Location:</strong> <?= htmlspecialchars($event['location']); ?></p>
+                            <form action="/events/register" method="POST">
+                                <input type="hidden" name="event_id" value="<?= $event['id']; ?>">
+                                <button type="submit" class="btn btn-primary">Attend</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            <?php } ?>
+        </div>
+        <?php if (isset($_SESSION['success_message'])): ?>
+            <div class="alert alert-success">
+                <?= htmlspecialchars($_SESSION['success_message']); ?>
+            </div>
+            <?php unset($_SESSION['success_message']); ?>
+        <?php elseif (isset($_SESSION['error_message'])): ?>
+            <div class="alert alert-danger">
+                <?= htmlspecialchars($_SESSION['error_message']); ?>
+            </div>
+            <?php unset($_SESSION['error_message']); ?>
+        <?php endif; ?>
+    </div>
+</section>
+
+
+
 
         <footer class="site-footer">
             <div class="container">

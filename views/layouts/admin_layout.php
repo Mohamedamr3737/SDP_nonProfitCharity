@@ -22,6 +22,9 @@
                         <a class="nav-link" href="/admin/donations">Manage Donations</a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" href="/admin/event_registrations">Event Registrations</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" href="/admin/payments">Manage Payments</a>
                     </li>
                     <li class="nav-item dropdown">
@@ -54,6 +57,9 @@
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
                         <a class="nav-link" href="/logout">Logout</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Back To Home</a>
                     </li>
                 </ul>
             </div>

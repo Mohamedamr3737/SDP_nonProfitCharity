@@ -58,5 +58,26 @@ class EventController {
             $this->model->removeAction($action['id']);
         }
     }
+    public function getFutureEvents() {
+        return $this->model->getFutureEvents();
+    }
+    public function registerForEvent($userId, $eventId) {
+        if (empty($userId) || empty($eventId)) {
+            throw new Exception("User ID or Event ID cannot be null.");
+        }
+    
+        return $this->model->registerForEvent($userId, $eventId);
+    }
+    public function markAttendance($registrationId) {
+        return $this->model->markAttendance($registrationId);
+    }
+    
+    public function getEventRegistrations() {
+        return $this->model->getEventRegistrations();
+    }
+    
+    
+    
+    
 }
 ?>

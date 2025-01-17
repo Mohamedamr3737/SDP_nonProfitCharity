@@ -8,7 +8,7 @@ CREATE TABLE if NOT EXISTS users (
     email VARCHAR(100) NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     login_type ENUM('email', 'social') NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     skills TEXT NOT NULL,
     availability ENUM('available', 'unavailable', 'busy') DEFAULT 'available',
     hours_worked INT DEFAULT 0
@@ -55,16 +55,15 @@ CREATE TABLE tasks (
 );
 
 /* tasks need hours */
-
-
-CREATE TABLE task_assignments (
+CREATE TABLE event_registrations (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    task_id INT NOT NULL,
-    volunteer_id INT NOT NULL,
-    FOREIGN KEY (task_id) REFERENCES tasks(id),
-    FOREIGN KEY (volunteer_id) REFERENCES users(id)
+    user_id INT NOT NULL,
+    event_id INT NOT NULL,
+    registration_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    is_attended TINYINT(1) DEFAULT 0,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (event_id) REFERENCES events(id)
 );
-
 
 
 

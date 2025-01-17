@@ -11,7 +11,7 @@ require '../models/Proxy/AccessControlProxy.php';
 require '../controllers/AdminDonationController.php';
 require '../controllers/AdminController.php';
 require '../controllers/AdminPaymentController.php';
-
+require '../models/Iterator/EventIterator.php';
 
 // Check if user is logged in
 
@@ -29,6 +29,10 @@ if (!isset($_SESSION['user_role'])) {
     $_SESSION['user_role'] = 'user';
 }
 
+if (!isset($_SESSION['user_id'])) {
+    $_SESSION['user_id'] = null;
+}
+
 $authController = new AuthController();
 $model = new EventModel(Database::getInstance()->getConnection());
 $donationController = new DonationController();
@@ -40,11 +44,11 @@ $donationProxy = new AccessControlProxy($AdminDonationController, $_SESSION['use
 $AdminPaymentController= new AdminPaymentController();
 $paymentProxy = new AccessControlProxy($AdminPaymentController, $_SESSION['user_role']);
 
-if (isset($_SESSION['user_id'])) {
+// if (isset($_SESSION['user_id'])) {
 $eventController = new EventController($model, $_SESSION['user_id']);
 $taskModel = new TaskModel(Database::getInstance()->getConnection());
 $taskController = new TaskController($taskModel, $_SESSION['user_id']);
-}
+// }
 // $taskController = new TaskController();
 
 // Get the requested URI
@@ -130,7 +134,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $needs = $BenefeciaryNeedsController->getAllBeneficiaryNeeds();
         include '../views/beneficiaries/manageNeeds.php';
     }    
-    //from here is the admin routes
     elseif ($uri === 'admin/dashboard') {
         $adminProxy->handleRequest('Admin','../views/admin/dashboard.php');
     }
@@ -143,15 +146,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     } elseif ($uri === 'admin/payments') {
         $payments = $paymentProxy->handleRequest('payment_admin', null,'viewPayments' );
         include '../views/admin/payments.php';
+    } elseif ($uri === 'admin/event_registrations') {
+        $adminProxy->handleRequest('super_admin', '../views/Ticketing/event_registrations.php', null, ['eventController' => $eventController]);
     }
      else {
         echo "Page not found.";
     }
 } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($uri === 'signup') {
-        echo $authController->signup($_POST);
+         $authController->signup($_POST);
     } elseif ($uri === 'login') {
-        echo $authController->login($_POST);
+         $authController->login($_POST);
     } elseif ($uri === 'submit_donation') {
                 // Start session if not started already
                 if (session_status() === PHP_SESSION_NONE) {
@@ -246,7 +251,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         });
     }
     
-    // //from here is the admin post
     elseif ($uri === 'admin/assign_role') {
         $adminProxy->handleRequest('super_admin', null, 'assignRole',$_POST['user_id'],$_POST['role'] );
         // $adminController->assignRole($_POST['user_id'], $_POST['role']);
@@ -261,8 +265,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             header('Location: /admin/list_beneficiaries'); // Redirect back to the beneficiaries list
             exit;
         });
+    }elseif ($uri === 'events/register') {
+            $eventId = $_POST['event_id'];
+            $userId = $_SESSION['user_id'];
+            try {
+                $eventController->registerForEvent($userId, $eventId);
+                $_SESSION['success_message'] = "You have successfully registered for the event.";
+            } catch (Exception $e) {
+                $_SESSION['error_message'] = "Failed to register for the event: " . $e->getMessage();
+            }
+            
+            header('Location: /'); // Redirect back to the homepage
+            exit;
     }
     
+    elseif ($uri === 'admin/mark_attendance') {
+        $adminProxy->handleRequest('super_admin', null, function() use ($eventController) {
+            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                $registrationId = $_POST['registration_id'] ?? null;
+    
+                try {
+                    $eventController->markAttendance($registrationId);
+                    $_SESSION['success_message'] = "Attendance marked successfully.";
+                } catch (Exception $e) {
+                    $_SESSION['error_message'] = $e->getMessage();
+                }
+    
+                header('Location: /Ticketing/event_registrations');
+                exit;
+            }
+        });
+    } 
     
     else {
         echo "Invalid action.";
