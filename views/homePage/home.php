@@ -352,17 +352,6 @@
                 </div>
             <?php } ?>
         </div>
-        <?php if (isset($_SESSION['success_message'])): ?>
-            <div class="alert alert-success">
-                <?= htmlspecialchars($_SESSION['success_message']); ?>
-            </div>
-            <?php unset($_SESSION['success_message']); ?>
-        <?php elseif (isset($_SESSION['error_message'])): ?>
-            <div class="alert alert-danger">
-                <?= htmlspecialchars($_SESSION['error_message']); ?>
-            </div>
-            <?php unset($_SESSION['error_message']); ?>
-        <?php endif; ?>
     </div>
 </section>
 
