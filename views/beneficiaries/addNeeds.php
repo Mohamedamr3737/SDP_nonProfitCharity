@@ -9,7 +9,6 @@
     <form action="/admin/assign_needs" method="post">
         <label for="beneficiary_id">Beneficiary:</label>
         <select name="beneficiary_id" required>
-            <?php error_log(json_encode($beneficiariess)) ?>
             <?php foreach ($beneficiariess as $beneficiary): ?>
                 <option value="<?= $beneficiary['id']; ?>"><?= htmlspecialchars($beneficiary['firstName'] . ' ' . $beneficiary['lastName']); ?></option>
             <?php endforeach; ?>
@@ -25,5 +24,7 @@
 
         <button type="submit">Assign Needs</button>
     </form>
+    <br>
+    <a href="/admin/manage_needs">Manage Needs</a>no
 </body>
 </html>

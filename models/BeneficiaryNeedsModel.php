@@ -30,5 +30,23 @@ class BeneficiaryNeedsModel extends BaseModel {
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+        // Get a specific need by ID
+        public function getNeedById($id) {
+            $stmt = $this->db->prepare("SELECT * FROM beneficiary_needs WHERE id = :id");
+            $stmt->execute(['id' => $id]);
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        }
     
+        // Update the state of a need
+        public function updateNeedState($id, $newState) {
+            $stmt = $this->db->prepare("UPDATE beneficiary_needs SET state = :state WHERE id = :id");
+            $stmt->execute([
+                'state' => $newState,
+                'id' => $id,
+            ]);
+        }
+        public function deleteNeed($id) {
+            $stmt = $this->db->prepare("DELETE FROM beneficiary_needs WHERE id = :id");
+            $stmt->execute(['id' => $id]);
+        }
 }

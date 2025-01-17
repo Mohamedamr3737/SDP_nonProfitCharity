@@ -5,6 +5,7 @@ require_once '../models/DecoratorBenefeciaryNeeds/MeatNeed.php';
 require_once '../models/DecoratorBenefeciaryNeeds/MoneyNeed.php';
 require_once '../models/DecoratorBenefeciaryNeeds/ServiceNeed.php';
 require_once '../models/BeneficiaryNeedsModel.php';
+require_once '../models/StateBenefeciaryNeeds/NeedBenefeciaryClass.php';
 
 
 class BenefeciaryNeedsController {
@@ -48,5 +49,42 @@ class BenefeciaryNeedsController {
     }
     public function getAllBeneficiaries() {
         return $this->beneficiaryNeedsModel->getAllBeneficiaries();
+    }
+    // Delete a need
+    public function deleteNeed($id) {
+        $this->beneficiaryNeedsModel->deleteNeed($id);
+        return "Need deleted successfully.";
+    }
+
+    // Change the state of a need
+    public function changeNeedState($needId, $action) {
+        // Fetch the current need
+        $needData = $this->beneficiaryNeedsModel->getNeedById($needId);
+
+        if (!$needData) {
+            return "Need not found.";
+        }
+
+        // Create a Need instance
+        $need = new NeedBenefeciaryClass($needId, $needData['state']);
+
+        // Perform the requested action
+        if ($action === 'next') {
+            $need->handle();
+        } elseif ($action === 'back') {
+            $need->moveBack();
+        } elseif ($action === 'cancel') {
+            $need->setState(new CancelledState);
+        }elseif ($action === 'noCancel') {
+            if($need->getState()== new CancelledState){
+            $need->setState(new RequestedState);
+            }
+        }
+
+        // Update the state in the database
+        $newState = strtolower(str_replace('State', '', (new ReflectionClass($need->getState()))->getShortName()));
+        $this->beneficiaryNeedsModel->updateNeedState($needId, $newState);
+
+        return "Need state updated successfully.";
     }
 }

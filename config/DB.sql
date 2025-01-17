@@ -92,6 +92,7 @@ CREATE TABLE beneficiary_needs (
     beneficiary_id INT NOT NULL,
     description TEXT NOT NULL, -- JSON-encoded needs
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    state ENUM('requested', 'approved', 'fulfilled', 'cancelled') DEFAULT 'requested',
     FOREIGN KEY (beneficiary_id) REFERENCES users(id)
 );
 

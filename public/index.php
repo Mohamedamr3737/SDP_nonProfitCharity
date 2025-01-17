@@ -98,19 +98,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     }elseif ($uri === 'admin/add_needs') {
         $beneficiaries = $BenefeciaryNeedsController->getAllBeneficiaries();
         include '../views/beneficiaries/addNeeds.php';
-    }elseif ($uri === 'admin/view_needs') {
-        $beneficiaryId = $_GET['beneficiary_id'] ?? null;
-        $needs = $beneficiaryId
-            ? $BenefeciaryNeedsController->getBeneficiaryNeeds($beneficiaryId)
-            : $BenefeciaryNeedsController->getAllBeneficiaryNeeds();
-    
-        include '../views/beneficiaries/viewNeeds.php';
     }elseif ($uri === 'admin/add_beneficiary') {
         include '../views/beneficiaries/addBeneficiary.php';
     }elseif ($uri === 'admin/list_beneficiaries') {
         $beneficiaries = $BenefeciaryNeedsController->getAllBeneficiaries();
         include '../views/beneficiaries/listBeneficiaries.php';
-    }
+    } elseif ($uri === 'admin/manage_needs') {
+        $needs = $BenefeciaryNeedsController->getAllBeneficiaryNeeds();
+        include '../views/beneficiaries/manageNeeds.php';
+    }    
      else {
         echo "Page not found.";
     }
@@ -173,6 +169,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         ];
         $message = $BenefeciaryNeedsController->assignNeeds($beneficiaryId, $selectedNeeds);
         echo $message;
+    } elseif ($uri === 'beneficiaries/change_need_state') {
+        error_log(json_encode($_POST));
+        $response = $BenefeciaryNeedsController->changeNeedState($_POST['id'], $_POST['action']);
+        header('Location: /admin/manage_needs');
+        exit;
+    } elseif ($uri === 'beneficiaries/delete_need') {
+        $response = $BenefeciaryNeedsController->deleteNeed($_POST['id']);
+        header('Location: /admin/manage_needs');
+        exit;
     }
     else {
         echo "Invalid action.";
