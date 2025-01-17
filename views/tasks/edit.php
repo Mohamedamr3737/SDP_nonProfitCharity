@@ -1,26 +1,59 @@
 <?php $task = $taskController->getTask($_GET['id']); ?>
 
-    <h1>Edit Task</h1>
-    <form action="/tasks/update" method="post">
+<div class="container mt-4">
+    <h1 class="mb-4">Edit Task</h1>
+    <form action="/tasks/update" method="post" class="needs-validation" novalidate>
         <input type="hidden" name="id" value="<?= $task['id']; ?>">
-        <label for="name">Task Name:</label>
-        <input type="text" id="name" name="name" value="<?= htmlspecialchars($task['name']); ?>" required>
-        <br>
-        <label for="required_skill">Required Skill:</label>
-        <input type="text" id="required_skill" name="required_skill" value="<?= htmlspecialchars($task['required_skill']); ?>" required>
-        <br>
-        <label for="hours">Hours:</label>
-        <input type="text" id="hours" name="hours" value="<?= htmlspecialchars($task['hours']); ?>" required>
-        <br>
-        <label for="is_completed">Is Completed:</label>
-        <input type="checkbox" id="is_completed" name="is_completed" <?= $task['is_completed'] ? 'checked' : ''; ?>>
-        <br>
-        <button type="submit">Save Changes</button>
+
+        <div class="mb-3">
+            <label for="name" class="form-label">Task Name:</label>
+            <input type="text" id="name" name="name" class="form-control" value="<?= htmlspecialchars($task['name']); ?>" required>
+            <div class="invalid-feedback">Please enter the task name.</div>
+        </div>
+
+        <div class="mb-3">
+            <label for="required_skill" class="form-label">Required Skill:</label>
+            <input type="text" id="required_skill" name="required_skill" class="form-control" value="<?= htmlspecialchars($task['required_skill']); ?>" required>
+            <div class="invalid-feedback">Please enter the required skill.</div>
+        </div>
+
+        <div class="mb-3">
+            <label for="hours" class="form-label">Hours:</label>
+            <input type="number" id="hours" name="hours" class="form-control" value="<?= htmlspecialchars($task['hours']); ?>" required>
+            <div class="invalid-feedback">Please enter the estimated hours.</div>
+        </div>
+
+        <div class="form-check mb-3">
+            <input type="checkbox" id="is_completed" name="is_completed" class="form-check-input" <?= $task['is_completed'] ? 'checked' : ''; ?>>
+            <label for="is_completed" class="form-check-label">Is Completed</label>
+        </div>
+
+        <div class="d-flex">
+            <button type="submit" class="btn btn-primary me-3">Save Changes</button>
+            <a href="/events/edit/<?= $task['event_id']; ?>" class="btn btn-secondary">Back to Event</a>
+        </div>
     </form>
-    <a href="/events/edit/<?= $task['event_id']; ?>">Back to Event</a>
-    <?php
+</div>
+
+<script>
+    // Bootstrap form validation script
+    (function () {
+        'use strict'
+        const forms = document.querySelectorAll('.needs-validation');
+        Array.from(forms).forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    })();
+</script>
+
+<?php
 $content = ob_get_clean();
-$pageTitle = "Manage Donations";
+$pageTitle = "Edit Task";
 include '../views/layouts/admin_layout.php';
 ?>
-

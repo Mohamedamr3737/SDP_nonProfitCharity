@@ -233,7 +233,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 'service' => $_POST['service'] ?? null,
             ];
             $message = $BenefeciaryNeedsController->assignNeeds($beneficiaryId, $selectedNeeds);
-            echo $message;
+            header('Location: /admin/manage_needs');
             exit;
         });
     } elseif ($uri === 'beneficiaries/change_need_state') {
@@ -277,10 +277,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             
             header('Location: /'); // Redirect back to the homepage
             exit;
-    }
-    
-    elseif ($uri === 'admin/mark_attendance') {
-        $adminProxy->handleRequest('super_admin', null, function() use ($eventController) {
+    }elseif ($uri === 'admin/mark_attendance') {
+        $adminProxy->handleRequest('super_admin', null, function () use ($eventController) {
             if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $registrationId = $_POST['registration_id'] ?? null;
     
@@ -291,11 +289,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                     $_SESSION['error_message'] = $e->getMessage();
                 }
     
-                header('Location: /Ticketing/event_registrations');
+                header('/admin/event_registrations');
                 exit;
             }
         });
-    } 
+    }
+    
     
     else {
         echo "Invalid action.";

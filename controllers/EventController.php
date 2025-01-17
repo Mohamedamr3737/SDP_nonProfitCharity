@@ -68,13 +68,19 @@ class EventController {
     
         return $this->model->registerForEvent($userId, $eventId);
     }
-    public function markAttendance($registrationId) {
-        return $this->model->markAttendance($registrationId);
-    }
+ 
     
     public function getEventRegistrations() {
         return $this->model->getEventRegistrations();
     }
+    public function markAttendance($registrationId) {
+        if (empty($registrationId)) {
+            throw new Exception("Registration ID is required.");
+        }
+    
+        $this->model->updateAttendance($registrationId);
+    }
+    
     
     
     

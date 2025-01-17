@@ -87,20 +87,6 @@ class EventModel extends BaseModel {
         ]);
         return true;
     }
-    public function markAttendance($registrationId) {
-        if (empty($registrationId)) {
-            throw new Exception("Registration ID cannot be null.");
-        }
-    
-        $stmt = $this->db->prepare("
-            UPDATE event_registrations
-            SET is_attended = 1
-            WHERE id = :registration_id
-        ");
-        $stmt->execute(['registration_id' => $registrationId]);
-    
-        return $stmt->rowCount() > 0; // Returns true if rows are affected
-    }
     
     public function getEventRegistrations() {
         $stmt = $this->db->prepare("
@@ -117,6 +103,15 @@ class EventModel extends BaseModel {
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+    public function updateAttendance($registrationId) {
+        $stmt = $this->db->prepare("
+            UPDATE event_registrations
+            SET is_attended = 1
+            WHERE id = :registration_id
+        ");
+        $stmt->execute(['registration_id' => $registrationId]);
+    }
+    
     
     
     
