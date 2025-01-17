@@ -130,6 +130,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         if($_POST['donorName']==""){
             $_POST['donorName'] = $_SESSION['user_name'];
             $_POST['donorId'] = $_SESSION['user_id'];
+            $_POST['donorEmail'] = $_SESSION['user_email'];
         }else{
             $_POST['donorId'] = Null;
 

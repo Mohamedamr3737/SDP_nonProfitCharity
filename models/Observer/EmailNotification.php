@@ -1,50 +1,35 @@
 <?php
 require_once __DIR__ . '/Observer.php';
-require  __DIR__ . '/../../vendor/autoload.php';
-
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
+require_once __DIR__ . '/../AdapterEmailInterface/EmailServiceAdapter.php';
 
 class EmailNotification implements Observer {
+    private $emailService;
+
+    public function __construct() {
+        $this->emailService = new EmailServiceAdapter();
+    }
+
     public function update($data) {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
+        $senderEmail = $data['sender_email'] ?? 'mohamedamr2002a@gmail.com';
+        $senderName = $data['sender_name'] ?? 'Observer Adapter System';
+        $recipientEmail = $data['recipient_email'] ?? null;
+        $recipientName = $data['recipient_name'] ?? 'User';
+        $subject = $data['subject'] ?? 'Notification';
+        $message = $data['message'] ?? 'No message provided.';
+
+        if (!$recipientEmail) {
+            error_log("Recipient email is missing. Cannot send email.");
+            return;
         }
 
-        $_SESSION['donation_message'] = "Thank you for your donation, " . htmlspecialchars($data) . "! from Observer";
+        // Set email details
+        $this->emailService->setSender($senderEmail, $senderName);
+        $this->emailService->setRecipient($recipientEmail, $recipientName);
+        $this->emailService->setSubject($subject);
+        $this->emailService->setMessage($message);
 
-        $mail = new PHPMailer(true);
-
-        try {
-           
-            $mail->SMTPDebug = 2; 
-            $mail->Debugoutput = function($str, $level) { error_log("SMTP Debug: $str"); };
-
-            // Gmail SMTP server settings
-            $mail->isSMTP();
-            $mail->Host = 'smtp.gmail.com';
-            $mail->SMTPAuth = true;
-            $mail->Username = 'mohamedamr2002a@gmail.com'; 
-            $mail->Password = 'hfhe yyju nfdm rfyd';
-            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-            $mail->Port = 587;
-
-            // Recipients
-            $mail->setFrom('mohamedamr2002a@gmail.com', 'From the observer');
-            if(isset($_SESSION['user_email']))
-            $mail->addAddress($_SESSION['user_email']); // Recipient email address
-            else
-            throw new Exception('not logged in');
-
-            // Content
-            $mail->isHTML(true);
-            $mail->Subject = 'Donation Received';
-            $mail->Body    = "Thank you for your donation, " . htmlspecialchars($data) . "!";
-
-            $mail->send();
-            error_log("Email successfully sent via Gmail.");
-        } catch (Exception $e) {
-            error_log("Email could not be sent. Mailer Error: {$mail->ErrorInfo}");
-        }
+        // Send the email
+        $this->emailService->send();
     }
 }
+

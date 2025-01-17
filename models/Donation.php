@@ -17,7 +17,12 @@ abstract class Donation implements Observable {
 
     public function notifyObservers($data) {
         foreach ($this->observers as $observer) {
-            $observer->update($data);
+            $observer->update([
+                'recipient_email' => $data['recipient_email'],
+                'recipient_name' => $data['recipient_name'],
+                'subject' => $data['subject'],
+                'message' => $data['message'],
+            ]);
         }
     }
 

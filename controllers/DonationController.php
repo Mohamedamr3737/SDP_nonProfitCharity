@@ -29,7 +29,7 @@ public function generateReceiptAndProcessPayment($data, $applyTax = true) {
         $productName = isset($data['productName']) ? $data['productName'] : null;
         $serviceDescription = isset($data['serviceDescription']) ? $data['serviceDescription'] : null;
         $donorId=$data['donorId']?$data['donorId']:null;
-
+        $donorEmail=$data['donorEmail'];
         // Generate the receipt
         $receipt = new BaseDonationReceipt($donorName, $donationAmount, $productName, $serviceDescription);
         if ($applyTax && $donationAmount != 0) {
@@ -54,7 +54,7 @@ public function generateReceiptAndProcessPayment($data, $applyTax = true) {
 
             if ($paymentResult['status'] === true) {
                 // Payment successful; save donation and add payment message to response
-                $response['message'] = $this->saveDonation($donorName, $donationType, $donorId,$totalAmount, $productName, $serviceDescription);
+                $response['message'] = $this->saveDonation($donorName, $donationType, $donorId,$totalAmount, $productName, $serviceDescription, $donorEmail);
                 $response['paymentMessage'] = $paymentResult['message']; // Include payment message
                 $response['status'] = 'success';
             } else {
@@ -63,7 +63,7 @@ public function generateReceiptAndProcessPayment($data, $applyTax = true) {
             }
         } else {
             // No payment needed; just save the donation
-            $response['message'] = $this->saveDonation($donorName, $donationType, $donorId, $donationAmount, $productName, $serviceDescription);
+            $response['message'] = $this->saveDonation($donorName, $donationType, $donorId, $donationAmount, $productName, $serviceDescription, $donorEmail);
             $response['status'] = 'success';
         }
 
@@ -77,11 +77,11 @@ public function generateReceiptAndProcessPayment($data, $applyTax = true) {
 }
 
 
-    private function saveDonation($donorName, $donationType, $donorId, $amount = null, $productName = null, $serviceDescription = null) {
+    private function saveDonation($donorName, $donationType, $donorId, $amount = null, $productName = null, $serviceDescription = null, $donorEmail = null) {
         try {
             
 
-            $donation = DonationFactory::createDonation($donationType, $donorName, $donorId, $amount, $productName, $serviceDescription);
+            $donation = DonationFactory::createDonation($donationType, $donorName, $donorId, $amount, $productName, $serviceDescription, $donorEmail);
             $donation->addObserver(new EmailNotification());
             return $donation->save(); // Return success message from save method
         } catch (Exception $e) {
