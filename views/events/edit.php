@@ -2,12 +2,6 @@
 $event = $eventController->getEvent($_GET['id']);
 ?>
 
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Edit Event</title>
-</head>
-<body>
     <h1>Edit Event</h1>
     <form action="/events/update" method="post">
         <input type="hidden" name="id" value="<?= $event['id']; ?>">
@@ -23,5 +17,8 @@ $event = $eventController->getEvent($_GET['id']);
         <button type="submit">Save Changes</button>
     </form>
     <a href="/events/list">Back to List</a>
-</body>
-</html>
+    <?php
+$content = ob_get_clean();
+$pageTitle = "Manage Donations";
+include '../views/layouts/admin_layout.php';
+?>

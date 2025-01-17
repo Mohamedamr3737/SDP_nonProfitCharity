@@ -1,9 +1,4 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Add Beneficiary</title>
-</head>
-<body>
+
     <h1>Add Beneficiary</h1>
     <form action="/signup" method="post">
         <input type="hidden" name="type" value="beneficiary">
@@ -22,6 +17,10 @@
 
         <button type="submit">Add Beneficiary</button>
     </form>
-    <a href="/admin/view_needs">Back to Beneficiary Needs</a>
-</body>
-</html>
+    <a href="/admin/list_beneficiaries">Back to Beneficiary Needs</a>
+
+    <?php
+$content = ob_get_clean();
+$pageTitle = "Manage Donations";
+include '../views/layouts/admin_layout.php';
+?>

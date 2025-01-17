@@ -24,6 +24,32 @@
                     <li class="nav-item">
                         <a class="nav-link" href="/admin/payments">Manage Payments</a>
                     </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="eventsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Events
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="eventsDropdown">
+                            <li><a class="dropdown-item" href="/events/list">Manage Events</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="tasksDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Tasks
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="tasksDropdown">
+                            <li><a class="dropdown-item" href="/tasks/list">Manage Tasks</a></li>
+                            <li><a class="dropdown-item" href="/tasks/available">Available Tasks</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="beneficiariesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Beneficiaries
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="beneficiariesDropdown">
+                            <li><a class="dropdown-item" href="/admin/list_beneficiaries">Manage Beneficiaries</a></li>
+                            <li><a class="dropdown-item" href="/admin/manage_needs">Manage Needs</a></li>
+                        </ul>
+                    </li>
                 </ul>
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">

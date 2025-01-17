@@ -27,7 +27,7 @@ class AuthController extends BaseController {
     public function signup($data) {
 
         if ($data['type'] === 'beneficiary') {
-            $data['email'] = '';
+            $data['email'] = null;
             $data['password'] = '';
             $data['rePassword'] = ''; // Match empty passwords
             $data['login_type'] = '';

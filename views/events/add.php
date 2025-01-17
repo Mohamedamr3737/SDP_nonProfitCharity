@@ -1,9 +1,4 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Add Event</title>
-</head>
-<body>
+
     <h1>Add Event</h1>
     <form action="/events/create" method="post">
         <label for="name">Name:</label>
@@ -18,5 +13,8 @@
         <button type="submit">Add Event</button>
     </form>
     <a href="/events/list">Back to List</a>
-</body>
-</html>
+    <?php
+$content = ob_get_clean();
+$pageTitle = "Manage Donations";
+include '../views/layouts/admin_layout.php';
+?>

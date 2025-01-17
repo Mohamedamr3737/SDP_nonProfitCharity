@@ -1,10 +1,6 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Manage Beneficiary Needs</title>
-</head>
-<body>
+
     <h1>Beneficiary Needs Management</h1>
+    <a href="/admin/add_needs">Add Needs</a>
 
     <table border="1">
         <tr>
@@ -36,5 +32,8 @@
         </tr>
         <?php endforeach; ?>
     </table>
-</body>
-</html>
+    <?php
+$content = ob_get_clean();
+$pageTitle = "Manage Donations";
+include '../views/layouts/admin_layout.php';
+?>

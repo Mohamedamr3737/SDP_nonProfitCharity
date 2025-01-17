@@ -5,7 +5,7 @@ CREATE TABLE if NOT EXISTS users (
     phone VARCHAR(15) NOT NULL UNIQUE,
     type ENUM('donor', 'volunteer','beneficiary','admin') NOT NULL,
     role ENUM('super_admin', 'donations_admin', 'payment_admin', 'user') DEFAULT 'user',
-    email VARCHAR(100) NOT NULL UNIQUE,
+    email VARCHAR(100) NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     login_type ENUM('email', 'social') NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP

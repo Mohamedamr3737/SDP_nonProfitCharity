@@ -1,11 +1,5 @@
 <?php $task = $taskController->getTask($_GET['id']); ?>
 
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Edit Task</title>
-</head>
-<body>
     <h1>Edit Task</h1>
     <form action="/tasks/update" method="post">
         <input type="hidden" name="id" value="<?= $task['id']; ?>">
@@ -24,5 +18,9 @@
         <button type="submit">Save Changes</button>
     </form>
     <a href="/events/edit/<?= $task['event_id']; ?>">Back to Event</a>
-</body>
-</html>
+    <?php
+$content = ob_get_clean();
+$pageTitle = "Manage Donations";
+include '../views/layouts/admin_layout.php';
+?>
+

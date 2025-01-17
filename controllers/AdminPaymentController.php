@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '../models/AdminPaymentModel.php';
+require_once __DIR__ . '/../models/AdminPaymentModel.php';
 
 class AdminPaymentController {
     private $paymentModel;

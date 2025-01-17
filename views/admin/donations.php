@@ -1,9 +1,4 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Manage Donations</title>
-</head>
-<body>
+
     <h1>Manage Donations</h1>
     <table border="1">
         <thead>
@@ -39,5 +34,10 @@
             <?php endforeach; ?>
         </tbody>
     </table>
-</body>
-</html>
+
+<?php
+$content = ob_get_clean();
+$pageTitle = "Manage Donations";
+include '../views/layouts/admin_layout.php';
+?>
+

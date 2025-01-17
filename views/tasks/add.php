@@ -1,9 +1,4 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Add Task</title>
-</head>
-<body>
+
     <h1>Add Task</h1>
     <form action="/tasks/create" method="post">
         <label for="event_id">Event:</label>
@@ -31,5 +26,9 @@
         <button type="submit">Add Task</button>
     </form>
     <a href="/tasks/list">Back to Tasks</a>
-</body>
-</html>
+    <?php
+$content = ob_get_clean();
+$pageTitle = "Manage Donations";
+include '../views/layouts/admin_layout.php';
+?>
+

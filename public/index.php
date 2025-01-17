@@ -10,6 +10,8 @@ require '../controllers/BenefeciaryNeedsController.php';
 require '../models/Proxy/AccessControlProxy.php';
 require '../controllers/AdminDonationController.php';
 require '../controllers/AdminController.php';
+require '../controllers/AdminPaymentController.php';
+
 
 // Check if user is logged in
 
@@ -65,60 +67,61 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         // $donationController->showDonationForm();
         include '../views/donation/create.php';
     } elseif ($uri === 'events/list') {
-
-        // Show list of events
-        include '../views/events/list.php';
-    } elseif ($uri === 'events/add') {
-
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-
-        if (!isset($_SESSION['user_name'])) {
-            echo json_encode(['message' => 'Please login to proceed with your donation.']);
-            exit;
-        }
-        // Show add event form
-        include '../views/events/add.php';
+        $adminProxy->handleRequest('super_admin', '../views/events/list.php', null, ['eventController' => $eventController]);
+    }
+    elseif ($uri === 'events/add') {
+        $adminProxy->handleRequest('super_admin', '../views/events/add.php');
     } elseif (preg_match('/^events\/edit\/\d+$/', $uri)) {
         // Extract the event ID from the route and show edit form
         $id = explode('/', $uri)[2];
         $_GET['id'] = $id;
         include '../views/events/edit.php';
     } elseif ($uri === 'events/undo') {
-        $eventController->undo();
-        header('Location: /events/list');
-    }    elseif ($uri === 'tasks/list') {
-
-        include '../views/tasks/list.php';
-    } elseif ($uri === 'tasks/add') {
-        include '../views/tasks/add.php';
-    } elseif ($uri === 'tasks/edit') {
-        include '../views/tasks/edit.php';
-    } elseif ($uri === 'tasks/undo') {
-        $taskController->undo();
-        header('Location: /tasks/list');
-    }elseif ($uri === 'tasks/available') {
-        $availableTasks = $taskController->getAvailableTasks();
-        include '../views/tasks/available.php';
-    }elseif ($uri === 'tasks/generate_certificate') {
-        $taskId = $_GET['task_id'];
-        $userId = $_GET['user_id'];
-    
-        $filePath = $taskController->generateCertificate($taskId, $userId);
-    
-        if ($filePath) {
-            $_SESSION['certificate_link'] = $filePath; // Store the link in the session
-            header('Location: /tasks/list'); // Redirect back to the tasks list
+        $adminProxy->handleRequest('super_admin', null, function() use ($eventController) {
+            $eventController->undo();
+            header('Location: /events/list');
             exit;
-        } else {
-            echo "Failed to generate certificate.";
-        }
+        });
+    }   elseif ($uri === 'tasks/list') {
+        $adminProxy->handleRequest('super_admin', '../views/tasks/list.php', null, ['taskController' => $taskController]);
     }
+    elseif ($uri === 'tasks/add') {
+        $adminProxy->handleRequest('super_admin', '../views/tasks/add.php', null, ['eventController' => $eventController]);
+    } elseif ($uri === 'tasks/edit') {
+        $adminProxy->handleRequest('super_admin', '../views/tasks/edit.php', null, ['taskController' => $taskController]);
+    } elseif ($uri === 'tasks/undo') {
+        $adminProxy->handleRequest('super_admin', null, function() use ($taskController) {
+            $taskController->undo();
+            header('Location: /tasks/list');
+            exit;
+            });
+    }elseif ($uri === 'tasks/available') {
+        $adminProxy->handleRequest('super_admin', null, function() use ($taskController) {
+            $availableTasks = $taskController->getAvailableTasks();
+            include '../views/tasks/available.php';
+        });
+    }elseif ($uri === 'tasks/generate_certificate') {
+        $adminProxy->handleRequest('super_admin', null, function() use ($taskController) {
+            $taskId = $_GET['task_id'];
+            $userId = $_GET['user_id'];
+        
+            $filePath = $taskController->generateCertificate($taskId, $userId);
+        
+            if ($filePath) {
+                $_SESSION['certificate_link'] = $filePath; // Store the link in the session
+                header('Location: /tasks/list'); // Redirect back to the tasks list
+                exit;
+            } else {
+                echo "Failed to generate certificate.";
+            }
+        });
+    }    
     elseif ($uri === 'admin/add_needs') {
-        $beneficiaries = $BenefeciaryNeedsController->getAllBeneficiaries();
-        include '../views/beneficiaries/addNeeds.php';
-    }elseif ($uri === 'admin/add_beneficiary') {
+        $donationProxy->handleRequest('donations_admin', '../views/beneficiaries/addNeeds.php', null, [
+            'beneficiariess' => $BenefeciaryNeedsController->getAllBeneficiaries()
+        ]);
+    }
+    elseif ($uri === 'admin/add_beneficiary') {
         include '../views/beneficiaries/addBeneficiary.php';
     }elseif ($uri === 'admin/list_beneficiaries') {
         $beneficiaries = $BenefeciaryNeedsController->getAllBeneficiaries();
@@ -129,13 +132,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     }    
     //from here is the admin routes
     elseif ($uri === 'admin/dashboard') {
-        $adminProxy->handleRequest('super_admin','../views/admin/dashboard.php'); // Check if the user has the 'admin' role
+        $adminProxy->handleRequest('Admin','../views/admin/dashboard.php');
     }
      elseif ($uri === 'admin/users') {
         $users = $adminProxy->handleRequest('super_admin', null, 'viewUsers');
         include '../views/admin/users.php';
     } elseif ($uri === 'admin/donations') {
-        $donations = $donationProxy->handleRequest('donation_admin', null,'viewDonations' );
+        $donations = $donationProxy->handleRequest('donations_admin', null,'viewDonations' );
         include '../views/admin/donations.php';
     } elseif ($uri === 'admin/payments') {
         $payments = $paymentProxy->handleRequest('payment_admin', null,'viewPayments' );
@@ -171,56 +174,96 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         }
         
         $donationController->generateReceiptAndProcessPayment($_POST);
-    } elseif ($uri === 'generate_receipt') {
-        
-    }elseif ($uri === 'events/create') {
-        $eventController->addEvent($_POST);
-        header('Location: /events/list');
+    } elseif ($uri === 'events/create') {
+        $adminProxy->handleRequest('super_admin', null, function() use ($eventController) {
+            $eventController->addEvent($_POST);
+            header('Location: /events/list');
+            exit;
+        });
     } elseif ($uri === 'events/update') {
-        $eventController->editEvent($_POST['id'], $_POST);
-        header('Location: /events/list');
+        $adminProxy->handleRequest('super_admin', null, function() use ($eventController) {
+            $eventController->editEvent($_POST['id'], $_POST);
+            header('Location: /events/list');
+            exit;
+        });
     } elseif ($uri === 'events/delete') {
-        $eventController->deleteEvent($_POST['id']);
-        header('Location: /events/list');
-    }    elseif ($uri === 'tasks/create') {
-        $taskController->addTask($_POST);
-        header('Location: /tasks/list');
+        $adminProxy->handleRequest('super_admin', null, function() use ($eventController) {
+            $eventController->deleteEvent($_POST['id']);
+            header('Location: /events/list');
+            exit;
+        });
+    } elseif ($uri === 'tasks/create') {
+        $adminProxy->handleRequest('super_admin', null, function() use ($taskController) {
+            $taskController->addTask($_POST);
+            header('Location: /tasks/list');
+            exit;
+        });
     } elseif ($uri === 'tasks/update') {
-        $taskController->editTask($_POST['id'], $_POST);
-        header('Location: /tasks/list');
+        $adminProxy->handleRequest('super_admin', null, function() use ($taskController) {
+            $taskController->editTask($_POST['id'], $_POST);
+            header('Location: /tasks/list');
+            exit;
+        });
     } elseif ($uri === 'tasks/delete') {
-        $taskController->deleteTask($_POST['id']);
-        header('Location: /tasks/list');
-    }elseif ($uri === 'tasks/assign') {
-        $response = $taskController->assignTask($_POST['task_id']);
-        echo json_encode(['message' => $response]);
+        $adminProxy->handleRequest('super_admin', null, function() use ($taskController) {
+            $taskController->deleteTask($_POST['id']);
+            header('Location: /tasks/list');
+            exit;
+        });
+    } elseif ($uri === 'tasks/assign') {
+        $adminProxy->handleRequest('super_admin', null, function() use ($taskController) {
+            $response = $taskController->assignTask($_POST['task_id']);
+            echo json_encode(['message' => $response]);
+            exit;
+        });
     }
-    // elseif ($uri === 'admin/assign_needs') {
-    //     $beneficiaryId = $_POST['beneficiary_id'];
-    //     $selectedNeeds = [
-    //         'vegetables' => $_POST['vegetables'] ?? null,
-    //         'meat' => $_POST['meat'] ?? null,
-    //         'money' => $_POST['money'] ?? null,
-    //         'service' => $_POST['service'] ?? null,
-    //     ];
-    //     $message = $BenefeciaryNeedsController->assignNeeds($beneficiaryId, $selectedNeeds);
-    //     echo $message;
-    // } elseif ($uri === 'beneficiaries/change_need_state') {
-    //     error_log(json_encode($_POST));
-    //     $response = $BenefeciaryNeedsController->changeNeedState($_POST['id'], $_POST['action']);
-    //     header('Location: /admin/manage_needs');
-    //     exit;
-    // } elseif ($uri === 'beneficiaries/delete_need') {
-    //     $response = $BenefeciaryNeedsController->deleteNeed($_POST['id']);
-    //     header('Location: /admin/manage_needs');
-    //     exit;
-    // }
+    
+    elseif ($uri === 'admin/assign_needs') {
+        $donationProxy->handleRequest('donations_admin', null, function() use ($BenefeciaryNeedsController) {
+            $beneficiaryId = $_POST['beneficiary_id'];
+            $selectedNeeds = [
+                'vegetables' => $_POST['vegetables'] ?? null,
+                'meat' => $_POST['meat'] ?? null,
+                'money' => $_POST['money'] ?? null,
+                'service' => $_POST['service'] ?? null,
+            ];
+            $message = $BenefeciaryNeedsController->assignNeeds($beneficiaryId, $selectedNeeds);
+            echo $message;
+            exit;
+        });
+    } elseif ($uri === 'beneficiaries/change_need_state') {
+        $donationProxy->handleRequest('donations_admin', null, function() use ($BenefeciaryNeedsController) {
+            error_log(json_encode($_POST));
+            $response = $BenefeciaryNeedsController->changeNeedState($_POST['id'], $_POST['action']);
+            header('Location: /admin/manage_needs');
+            exit;
+        });
+    } elseif ($uri === 'beneficiaries/delete_need') {
+        $donationProxy->handleRequest('donations_admin', null, function() use ($BenefeciaryNeedsController) {
+            $response = $BenefeciaryNeedsController->deleteNeed($_POST['id']);
+            header('Location: /admin/manage_needs');
+            exit;
+        });
+    }
+    
     // //from here is the admin post
     elseif ($uri === 'admin/assign_role') {
         $adminProxy->handleRequest('super_admin', null, 'assignRole',$_POST['user_id'],$_POST['role'] );
         // $adminController->assignRole($_POST['user_id'], $_POST['role']);
         header('Location: /admin/users');
+    }elseif ($uri === 'admin/change_donation_state') {
+        $donationProxy->handleRequest('donations_admin', null, 'changeDonationState', $_POST['donation_id'], $_POST['state']);
+        header('Location: /admin/donations'); // Redirect back to the donations page
+        exit;
+    }elseif ($uri === 'admin/delete_beneficiary') {
+        $donationProxy->handleRequest('donations_admin', null, function() use ($BenefeciaryNeedsController) {
+            $BenefeciaryNeedsController->deleteBeneficiary($_POST['id']);
+            header('Location: /admin/list_beneficiaries'); // Redirect back to the beneficiaries list
+            exit;
+        });
     }
+    
+    
     else {
         echo "Invalid action.";
     }

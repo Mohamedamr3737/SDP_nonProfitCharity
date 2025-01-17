@@ -1,9 +1,4 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Assign Task</title>
-</head>
-<body>
+
     <h1>Assign Task to User</h1>
     <form action="/tasks/assign" method="post">
         <label for="task_id">Select a Task:</label>
@@ -19,5 +14,9 @@
         <button type="submit">Assign Task</button>
     </form>
     <a href="/tasks/list">Back to Task List</a>
-</body>
-</html>
+    <?php
+$content = ob_get_clean();
+$pageTitle = "Manage Donations";
+include '../views/layouts/admin_layout.php';
+?>
+

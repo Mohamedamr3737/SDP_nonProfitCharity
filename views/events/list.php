@@ -1,9 +1,4 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Events List</title>
-</head>
-<body>
+
     <h1>Events</h1>
     <a href="/events/add">Add Event</a>
     <table border="1">
@@ -32,8 +27,9 @@
     <form action="/events/undo" method="get" style="display:inline;">
         <button type="submit">Undo</button>
     </form>
-    <form action="/events/redo" method="get" style="display:inline;">
-        <button type="submit">Redo</button>
-    </form>
-</body>
-</html>
+
+    <?php
+$content = ob_get_clean();
+$pageTitle = "Manage Donations";
+include '../views/layouts/admin_layout.php';
+?>

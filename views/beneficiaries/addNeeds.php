@@ -1,10 +1,4 @@
-<?php $beneficiariess = $BenefeciaryNeedsController->getAllBeneficiaries(); ?>
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Assign Needs</title>
-</head>
-<body>
+
     <h1>Assign Needs to Beneficiary</h1>
     <form action="/admin/assign_needs" method="post">
         <label for="beneficiary_id">Beneficiary:</label>
@@ -25,6 +19,9 @@
         <button type="submit">Assign Needs</button>
     </form>
     <br>
-    <a href="/admin/manage_needs">Manage Needs</a>no
-</body>
-</html>
+    <a href="/admin/manage_needs">Manage Needs</a>
+    <?php
+$content = ob_get_clean();
+$pageTitle = "Manage Donations";
+include '../views/layouts/admin_layout.php';
+?>

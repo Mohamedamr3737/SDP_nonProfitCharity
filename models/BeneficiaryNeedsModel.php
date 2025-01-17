@@ -49,4 +49,14 @@ class BeneficiaryNeedsModel extends BaseModel {
             $stmt = $this->db->prepare("DELETE FROM beneficiary_needs WHERE id = :id");
             $stmt->execute(['id' => $id]);
         }
+        public function deleteBeneficiary($id) {
+            // Delete the beneficiary's needs first to maintain database integrity
+            $stmt = $this->db->prepare("DELETE FROM beneficiary_needs WHERE beneficiary_id = :id");
+            $stmt->execute(['id' => $id]);
+        
+            // Delete the beneficiary from the users table
+            $stmt = $this->db->prepare("DELETE FROM users WHERE id = :id AND type = 'beneficiary'");
+            $stmt->execute(['id' => $id]);
+        }
+        
 }

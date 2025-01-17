@@ -9,9 +9,6 @@ $certificateLink = $_SESSION['certificate_link'] ?? null; // Retrieve certificat
 unset($_SESSION['certificate_link']); // Clear the session after displaying the link
 ?>
 
-<!DOCTYPE html>
-<html>
-<head>
     <title>All Tasks</title>
 </head>
 <body>
@@ -59,5 +56,9 @@ unset($_SESSION['certificate_link']); // Clear the session after displaying the 
         <h2>Download Certificate</h2>
         <a href="<?= $certificateLink; ?>" target="_blank">Download Certificate</a>
     <?php endif; ?>
-</body>
-</html>
+    <?php
+$content = ob_get_clean();
+$pageTitle = "Manage Donations";
+include '../views/layouts/admin_layout.php';
+?>
+

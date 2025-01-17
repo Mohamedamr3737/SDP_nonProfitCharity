@@ -87,4 +87,9 @@ class BenefeciaryNeedsController {
 
         return "Need state updated successfully.";
     }
+    public function deleteBeneficiary($id) {
+        $this->beneficiaryNeedsModel->deleteBeneficiary($id);
+        return "Beneficiary deleted successfully.";
+    }
+    
 }

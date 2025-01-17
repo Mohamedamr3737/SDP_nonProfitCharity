@@ -1,9 +1,4 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>List of Beneficiaries</title>
-</head>
-<body>
+
     <h1>Beneficiaries</h1>
     <a href="/admin/add_beneficiary">Add Beneficiary</a>
     <table border="1">
@@ -33,5 +28,9 @@
             <?php endforeach; ?>
         </tbody>
     </table>
-</body>
-</html>
+
+    <?php
+$content = ob_get_clean();
+$pageTitle = "Manage Donations";
+include '../views/layouts/admin_layout.php';
+?>
